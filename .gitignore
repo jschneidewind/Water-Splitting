@@ -74,3 +74,8 @@ celerybeat-schedule
 # mypy
 .mypy_cache/
 .DS_Store
+
+# cube and fchk files
+*.fchk
+*.cube
+
