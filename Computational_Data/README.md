@@ -40,7 +40,7 @@ G-Mono-D-0 | [**B-Mono-Trans**]D<sub>0</sub>
 GMe-Cis-CI12 | [**BC**] D<sub>1</sub>/D<sub>0</sub> MECI
 GMe-Cis-CI23 | [**BC**] D<sub>2</sub>/D<sub>1</sub> MECI
 H-Trans-R2-R2-Down-RuMove-T | [**C**]T<sub>0</sub>
-GMe-Cis-OOScan6-D0 and HMe-Trans-Mono-D-0 | [**C-Mono**]D<sub>0</sub> (Me model)
+GMe-Cis-OOScan6-D0 *and* HMe-Trans-Mono-D-0 | [**C-Mono**]D<sub>0</sub> (Me model)
 H-Trans-Mono-D-0-180 | [**C-Mono**]D<sub>0</sub>
 TSHJ-Trans-R2-R2-Down-T | TS-[**CD**]T<sub>0</sub>
 J-Trans-R2-R2-Down-TSGuess-T | [**D**]T<sub>0</sub> [**F**]D<sub>0</sub> (Dimer model)
