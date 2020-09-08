@@ -14,6 +14,18 @@ This repository contains original data and analysis code for "Final Title (two p
 
 Subdirectories contain seperate README.md files which detail their contents.
 
-
+We actively encourage others to work on this interesting new avenue in water splitting and are happy to answer questions or comments and are open to cooperations in this field.
 
 # Dependencies
+
+Python code (Python >3.7) requires the following libraries: numpy, scipy, matplotlib, pandas, pathlib, math, io, os, re and csv.
+
+# Installation
+
+To run data analysis code yourself it is easiest to clone the entire repository:
+
+```bash
+git clone https://github.com/jschneidewind/Water-Splitting
+```
+
+
