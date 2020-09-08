@@ -26,3 +26,18 @@ This directory contains experimental data.
 
 7. `start` indicates an alternate start time for O<sub>2</sub> baseline determination
 
+`NMR_Data` contains NMR data (in `Spectra_Export`, .mnova files and .pdf visualizations) and Excel sheets with numerical data for kinetic and dual irradiation NMR experiments.
+
+`Photographs` contains photographs of experimental set-ups.
+
+`Chemical_Actinometry.xlsx` contains chemical actinometry data.
+
+`Dual_Irradiation_Experimental_Predicted_Rates.xlsx` contains a calculation comparing experimental excess initial rates from dual irradiation experiments with predictions from the photochemical kinetic model.
+
+`ODE_Kinetic_Fit.xlsx` contains optimized parameters for the kinetic model fitted to kinetic NMR data.
+
+`Photochemical_Kinetic_Fit.xlsx` contains optimized parameters for the photochemical kinetic model.
+
+`QTH_Measured_Power.xlsx` contains experimentally measured power of QTH light source with different longpass filters.
+
+`Rate_Comparison_O2_Hydride_Formation.xlsx` contains a calculation comparing the rates of **2-cis** and O<sub>2</sub> formation.
