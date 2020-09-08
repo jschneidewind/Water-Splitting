@@ -12,7 +12,7 @@ For each structure there a typically files corresponding to two or three differe
 
 3. TD-DFT calculation including SMD solvation, designated by `-TD-SMD` file name. When a TD-DFT calculation was performed, there is typically also a `_uvvis.txt` file in the same directory containing data for the computed UV/Vis spectrum.
 
-For CASSCF calculations, optimizations are designated by `-Opt` file name, while calculations including solvation are designated by `-PCM` file name.
+For DFT calculations, `-GP` indicates the use of the standard functional/basis set combinations (PBE0 + cc-pVDZ or cc-pVTZ). For CASSCF calculations, optimizations are designated by `-Opt` file name, while calculations including solvation are designated by `-PCM` file name.
 
 Furthermore, for each intermediate there is an `.xyz` file containing coordinates, a `.png` file containing a visualization and a `.pov` file which can be used to render the visualization.
 
@@ -28,7 +28,17 @@ The names used in manuscript and supporting information differ from those of the
 
 Original Name | Final Name
 --- | ----
-F-R2-R2-Down | [**A**]S<sub>0</sub>
+F-R2-R2-Down-Disp | [**A**]S<sub>0</sub>
+3-Full-GP-Disp | [**A-Mono**]S<sub>0</sub>
+G-Cis-R2-R2-Down-T- | [**B**]T<sub>0</sub>
+GMe-Cis-Mono-D-0 | [**B-Mono**]D<sub>0</sub> (Me model)
+G-Cis-Mono-D-0 | [**B-Mono**]D<sub>0</sub>
+3-HCis-D-0 | [**B-Mono-Up**]D<sub>0</sub>
+G-R2-R2-Down | [**B-Trans**]T<sub>0</sub>
+G-Mono-D-0 | [**B-Mono-Trans**]D<sub>0</sub>
+3-HTrans-D-0 | [**B-Mono-Trans-Up**]D<sub>0</sub>
+
+
 
 
 
