@@ -18,5 +18,7 @@ Furthermore, for each intermediate there is an `.xyz` file containing coordinate
 
 `Images` contains simplified images used for visualization.
 
+`Misc` contains various other calculations, such as O-O bond scans, results for the **Oxo Dimer** and NMR reference data.
 
+`Overview_Energies` contains Excel sheets in which important energy values are collected and compared. Importantly, `DFT_Energies.xlsx` is used to generate the free energy profile and `CASSCF_Energies.xlsx` is used to generate the reaction path from [**B**]D<sub>0</sub> to [**C**]D<sub>0</sub>.
 
