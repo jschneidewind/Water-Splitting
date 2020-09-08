@@ -6,4 +6,5 @@ Overview of contents:
 
 Name | Contents
 --- | ---
-`Absorption_Spectrum_to_Dual_Irradiation.py` | Code to convert theoretical UV/Vis Spectra to  predicted dual irradiation behaviour
+`Absorption_Spectrum_to_Dual_Irradiation.py` | Code to convert theoretical UV/Vis Spectra to\
+predicted dual irradiation behaviour
