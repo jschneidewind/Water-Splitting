@@ -22,3 +22,16 @@ Furthermore, for each intermediate there is an `.xyz` file containing coordinate
 
 `Overview_Energies` contains Excel sheets in which important energy values are collected and compared. Importantly, `DFT_Energies.xlsx` is used to generate the free energy profile and `CASSCF_Energies.xlsx` is used to generate the reaction path from [**B**]D<sub>0</sub> to [**C**]D<sub>0</sub>.
 
+# Naming
+
+The names used in manuscript and supporting information differ from those of the original computational files provided herein. The correspondence is as follows:
+
+Original Name | Final Name
+--- | ----
+F-R2-R2-Down | [**A**]S<sub>0</sub>
+
+
+
+
+
+
