@@ -12,6 +12,6 @@ cax = plt.axes([0.01, 0.2, 0.98, 0.6])
 cbar = plt.colorbar(orientation = 'horizontal', cax = cax)
 cbar.set_ticks([])
 
-#plt.savefig('../Figures/Spectral_bar.pdf', transparent = True)
+plt.savefig('../Figures/Spectral_bar.pdf', transparent = True)
 
 plt.show()
