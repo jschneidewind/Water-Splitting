@@ -46,7 +46,7 @@ TSHJ-Trans-R2-R2-Down-T | TS-[**CD**]T<sub>0</sub>
 J-Trans-R2-R2-Down-TSGuess-T | [**D**]T<sub>0</sub> [**F**]D<sub>0</sub> (Dimer model)
 J-Trans-Mono-H2O-T0 | [**D**]T<sub>0</sub>
 J-Trans-Mono-H2O-T0-RuO-Scan | Scan-[**DE**]T<sub>0</sub>
-O-Full-Planar-H2O | [**E**]S<sub>0</sub>
+0-Full-Planar-H2O | [**E**]S<sub>0</sub>
 2-Full-Cis-A | [**F-Cis**]S<sub>0</sub>
 2-Full-Cis-B | [**F-Cis-Up**]S<sub>0</sub>
 2-Full-TPy-A | [**F**]S<sub>0</sub>

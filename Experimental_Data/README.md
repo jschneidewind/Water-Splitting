@@ -20,7 +20,7 @@ This directory contains experimental data.
 
 4. `wavelength` indicates for irradiation wavelength. For `intensity`, `temperature` and `kie` experiments a wavelength of `500` indicates that the Hg light source (320 - 500 nm) was used. For `dual` experiments, `wavelength` indicates the cut-on wavelength for the used longpass filter
 
-5. `power` indicates the intensity setting of the Hg light source for `intensity` experiments. For `dual` experiments, a power of `0.01` indicates that only the Hg light source was used. A power of `0.02` indicates that only the longpass filtered QTH light source was used. A power of `0.03` indicates that both light sources were used
+5. `power` indicates the intensity setting of the Hg light source for `intensity` experiments. For `dual` experiments, a power of `0.01` indicates that only the longpass filtered QTH light source was used. A power of `0.02` indicates that only the Hg light source (320 - 400 nm) was used. A power of `0.03` indicates that both light sources were used
 
 6. `active` indicates whether the experiment is used for data analysis
 
