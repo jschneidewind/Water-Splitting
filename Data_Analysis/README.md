@@ -13,10 +13,10 @@ Name | Contents
 `find_nearest.py` | Module to find index of value closest to provided one in an array
 `Free_Energy_Profile.py` | Code for visualization of free energy profile and conical intersections plot
 `Gas_Phase_O2_Analysis.py` | Code for gas phase O<sub>2</sub> analysis
-`IR_Analysis.py` | Visualization of experimental and theoretical IR spectra
+`IR_Analysis.py` | Visualization of experimental and theoretical IR spectra as well as EPR data
 `Liquid_Phase_O2_Analysis.py` | Main code for kinetic analysis. Contains code for analysis of intensity and dual irradiation data sets, KIE and temperature dependence, chemical actinometry and H<sub>2</sub>O<sub>2</sub> disproportionation.
 `O2_Data_Plotting.py` | Short script to visualize any experimental O<sub>2</sub> measurement file
 `ODE_Fit_to_Data.py` | Visualization of kinetic NMR data and fitting of kinetic model
-`OO_Bond_Scans.py` | Visualization of O-O bond scan results
+`OO_Bond_Scans.py` | Visualization of O-O bond scan results as well as Scan-[**DE**]T<sub>0<sub> results
 `Photochemical_Reaction_ODE_Sim.py` | Photochemical kinetic model and fitting of model to experimental data
 `UV_Vis_Spectra.py` | Import, processing and visualization of theoretical and experimental UV/Vis as well as light source spectra

@@ -26,7 +26,7 @@ This directory contains experimental data.
 
 7. `start` indicates an alternate start time for O<sub>2</sub> baseline determination
 
-`NMR_Data` contains NMR data (in `Spectra_Export`, .mnova files and .pdf visualizations) and Excel sheets with numerical data for kinetic and dual irradiation NMR experiments.
+`NMR_Data` contains NMR data (in `Spectra_Export`, .mnova files and .pdf visualizations) and Excel sheets with numerical data for kinetic and dual irradiation NMR experiments. For NMR file names, complex **1** is referred to as **3** (complex **2** is referred to as **2**).
 
 `Photographs` contains photographs of experimental set-ups.
 

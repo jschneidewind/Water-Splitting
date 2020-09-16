@@ -232,16 +232,12 @@ def main():
 	
 	ODE_model.calculate_initial_rates(plotting = False)
 
-
 	ODE_model.initial_rate_tau_dependence(3000., np.logspace(-4, 2, 20))
+	
 	# ODE_model.plot_tau_initial_rate(ax = ax)
-
-	# ODE_model.plot_full_ODE_solution(ax = ax, flux_level = 4.15e17)
-
-	#fig.savefig('200809_ODE_Model.pdf', transparent = True)
+	#ODE_model.plot_full_ODE_solution(ax = ax, flux_level = 4.15e17)
 
 	return ODE_model
-
 
 if __name__ == '__main__':
 	main()

@@ -323,7 +323,7 @@ class Experiment:
 		self.rate_combined = k_solved[0]
 		self.rate_combined_full = k_solved
 
-	def liquid_phase_O2_analysis_feature(self, offset = None, start = None, plotting = None, k1 = None, only_data_processing = False):
+	def liquid_phase_O2_analysis_feature(self, offset = None, start = None, plotting = None, k1 = None, only_data_processing = False, ax = plt):
 
 		if offset is None:
 			offset = self.correct_offset
@@ -367,9 +367,16 @@ class Experiment:
 
 			if plotting == True:
 				y_solved = feature_function(p.x, feature_t, pre_feature_average, k1)
-				plt.plot(feature_t, feature_O2, 'o-', markersize = 2., linewidth = 0.2, color = self.color)
-				plt.plot(feature_t, y_solved, color = self.color)
-				plt.plot(feature_t, (feature_O2 - y_solved), color = self.color, linewidth = 0.3)
+				ax.plot(feature_t, feature_O2, 'o-', markersize = 2., linewidth = 0.2, color = self.color, label = 'Data')
+				ax.plot(feature_t, y_solved, color = self.color, label = 'Fit')
+				ax.plot(feature_t, (feature_O2 - y_solved), color = self.color, linewidth = 0.3, label = 'Residual')
+
+				if ax is not plt:
+					ax.set_xlabel('Time / s')
+					ax.set_ylabel(r'$O_2$ / $\mu$mol $l^{-1}$')
+					ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
+
+				ax.legend()
 
 			self.residual = np.sum(residual[:50]**2)
 			self.rate_feature = k_solved[0]
@@ -701,7 +708,7 @@ class Dual_Irradiation_Analysis:
 
 		if ax != plt:
 			ax.set_xlabel('Longpass Cut-On Wavelength Second Light Source / nm')
-			ax.set_ylabel(r'Excess Initial Rate of $O_2$ Formation / $\mu mol s^{-1} l^{-1}$')
+			ax.set_ylabel(r'Excess Initial Rate of $O_2$ Formation / $\mu mol$ $s^{-1}$ $l^{-1}$')
 			ax.legend(loc = 'lower left')
 			ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
 
@@ -944,15 +951,15 @@ def main(return_dual_irradiation = False, dual_and_intensity = False):
 
 	excel_exps = convert_xlsx_to_experiments('../Experimental_Data/Liquid_Phase_O2_Data/Liquid_Phase_O2_Experiments_Metadata.xlsx')
 
-	fig, ax = plt.subplots(1, 2, figsize = (11,4))
-	fig.subplots_adjust(wspace = 0.3, bottom = 0.15) 
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,4))
+	fig.subplots_adjust(wspace = 0.3, bottom = 0.15, left = 0.07, right = 0.97) 
 
 	actinometry = Chemical_Actinometry('../Experimental_Data/Chemical_Actinometry.xlsx', '../Experimental_Data/20120613_Lumatec2_Spektren.txt')
 
 	# gme_casscf = Constructed_UV_Vis_Spectrum('../Computational_Data/B_Intermediate/Me_Mono/CASSCF/GMe-Cis-D0-VDZ-SA-CAS1311-Pi-RASSI.xlsx', 0.33)
 	theoretical_spectra = import_theoretical_spectra()
 	spectra_parameters = import_plotting_parameters()
-	spectrum_for_fit = 'three_hcis'  #three_hcis
+	spectrum_for_fit = 'three_hcis'
 
 	dual_irradiation = Dual_Irradiation_Analysis('feature', excel_exps['dual'], order_poly = 1)
 	dual_irradiation.fit_theoretical_spectrum_to_synergy(theoretical_spectra[spectrum_for_fit], 'lr', 'lr', 3400., 1000.)
@@ -998,7 +1005,18 @@ def secondary():
 
 	return fig, ax
 
+def tertiary():
+
+	fig, ax = plt.subplots()
+
+	excel_exps = convert_xlsx_to_experiments('../Experimental_Data/Liquid_Phase_O2_Data/Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	excel_exps['intensity']['js_600_4'].liquid_phase_O2_analysis_feature(plotting = True, ax = ax)
+
+	return fig
+
+
 if __name__ == '__main__':
 	main()
 	#secondary()
+	#tertiary()
 	plt.show()

@@ -12,6 +12,7 @@ import OO_Bond_Scans as oo
 import Decay_Associated_Spectra as das
 import UV_Vis_Spectra as uvvis
 import IR_Analysis as ir
+import O2_Data_Plotting as o2
 
 def Intensity_Dual_Irradiation():
 	fig, ax, _, _ = lp.main(dual_and_intensity = True)
@@ -35,7 +36,7 @@ def Dual_Irradiation():
 
 	return fig
 
-def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet'):
+def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upper right'):
 
 	theoretical_spectra = uvvis.import_theoretical_spectra(return_f_triplet = True)
 	spectra_parameters = uvvis.import_plotting_parameters()
@@ -49,7 +50,7 @@ def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet'):
 	dual_irradiation.fit_theoretical_spectrum_to_synergy(theoretical_spectra[spectrum_for_fit], 'lr', 'lr', 3400., 1000.)
 	dual_irradiation.plot_theoretical_fit(ax, spectra_parameters[spectrum_for_fit]['Name'])
 
-	ax.legend(loc = 'upper right')
+	ax.legend(loc = legend_loc)
 
 	return fig
 
@@ -58,6 +59,12 @@ def Dual_Irradiation_f_triplet():
 	fig = Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_triplet')
 
 	return fig 
+
+def Dual_Irradiation_g_mono():
+
+	fig = Dual_Irradiation_f_singlet(spectrum_for_fit = 'g_mono', legend_loc = 'lower left')
+
+	return fig
 
 def H2O2_Disproportionation():
 	fig, ax = lp.secondary()
@@ -191,6 +198,17 @@ def Lumatec_Spectra():
 
 	return fig
 
+def Liquid_Phase_Raw():
+
+	fig = o2.main()
+
+	return fig
+
+def Liquid_Phase_Analysis():
+
+	fig = lp.tertiary()
+
+	return fig
 
 
 class Figure:
@@ -204,10 +222,10 @@ class Figure:
 		plt.show()
 
 	def save(self):
-		self.fig.savefig('../Figures/%s.eps' % self.name, transparent = True, dpi = 500)
+		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
 
 
-figure = Figure(H2O2_Disproportionation)
+figure = Figure(Free_Energy_Profile)
 figure.show()
 #figure.save()
 

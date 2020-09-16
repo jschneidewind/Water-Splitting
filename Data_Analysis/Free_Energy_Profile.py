@@ -58,10 +58,10 @@ class Free_Energy_Profile:
 
 		elif int_type == prev_int_type:
 			if int_type == 'A':
-				wavelength = ax.annotate('h$\\nu$\n(320-\n400 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 8, ha = 'center', va = 'center')
+				wavelength = ax.annotate('$h$$\\nu_{1}$\n(320-\n400 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 10, ha = 'center', va = 'center')
 				excitation = ax.annotate('', xy =(pos, energy - arrow_space), xytext=(pos, prev_energy + arrow_space), arrowprops={'arrowstyle': '->', 'color': 'darkblue'})
 			if int_type == 'B':
-				wavelength = ax.annotate('h$\\nu$\n(450-\n600 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 8, ha = 'center', va = 'center')
+				wavelength = ax.annotate('$h$$\\nu_{2}$\n(450-\n600 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 10, ha = 'center', va = 'center')
 				excitation = ax.annotate('', xy =(pos, energy - arrow_space), xytext=(pos, prev_energy + arrow_space), arrowprops={'arrowstyle': '->', 'color': 'darkred'})
 
 	def plot_line_and_label(self, pos, width, energy, color_used, name_label, text_offset, ax, energy_offset = 0, energy_label = True, intermediate_label = True, approx = False, color_text = 'black'):
@@ -152,8 +152,8 @@ class Free_Energy_Profile:
 
 	def plot_profile(self):
 
-		fig, ax = plt.subplots(figsize = (11, 6.5))
-		fig.subplots_adjust(wspace = 0, hspace = 0 )
+		fig, ax = plt.subplots(figsize = (9, 6.5))   # 11, 6.5
+		fig.subplots_adjust(wspace = 0, hspace = 0, left = 0.07, right = 0.97, bottom = 0.05)
 		ax.spines['top'].set_color('none')
 		ax.spines['right'].set_color('none')
 		ax.set_xticks([]) 
@@ -180,7 +180,7 @@ class Free_Energy_Profile:
 		ox_offset = 0.35
 		ox_sphere_zoom = 0.023
 		plus_sign_offset = -25.
-		self.wavelength_offset = 0.3
+		self.wavelength_offset = 0.37
 
 		ax.set_xlim(x_lim_low, x_lim_high)
 		ax.set_ylim(y_lim_low, y_lim_high)
@@ -223,8 +223,7 @@ class Free_Energy_Profile:
 		handles, labels = ax.get_legend_handles_labels()
 		by_label = dict(zip(labels, handles))
 		ax.legend(by_label.values(), by_label.keys(), loc = (0.78, 0.17), title = r'$\bf{Model}$ $\bf{Chemistry}$')
-
-		#fig.savefig('Test_save_new.pdf', dpi = 500, transparent = True)
+		ax.text(-0.035, 1.05, 'A', transform=ax.transAxes, size = 20, weight='bold')
 
 		return fig
 
@@ -317,13 +316,12 @@ class Conical_Intersections:
 			ax.plot(positions, i, 'o-', label = r'$\bf{D_{%s}}$' % (roots - counter - 1), linewidth = 2.5, markersize = 10, zorder = 5)
 		
 		ax.plot(positions, path + path_offset, '--', color = 'black', label = 'Reaction Path', zorder = 10)
+		ax.text(-0.12, 1.025, 'B', transform=ax.transAxes, size = 20, weight='bold')
 
 		plt.xticks(positions, x_labels)
 		ax.legend()
 
 		return fig
-
-		#fig.savefig('Test_CI.pdf', dpi = 500, transparent = True)
 
 if __name__ == '__main__':
 

@@ -78,10 +78,6 @@ class Decay_Associated_Spectra:
 
 		data = self.format_DAS_data(polarization)
 
-		#ax.plot(data[:,0], data[:,1], label = r'$\tau$ = 6 ps', color = 'seagreen')
-		#ax.plot(data[:,0], data[:,2], label = r'$\tau$ = 150 ps', color = 'red')
-
-
 		ax.plot(data[:,0], data[:,1], label = r'$\tau$ = 6 ps', color = 'darkgreen')
 		ax.plot(data[:,0], data[:,2], label = r'$\tau$ = 150 ps', color = 'darkred')
 		
@@ -109,14 +105,16 @@ class Decay_Associated_Spectra:
 
 def main():
 	fig, ax = plt.subplots()
+	fig.subplots_adjust(top = 0.95, left = 0.11, right = 0.97)
 
 	das = Decay_Associated_Spectra()
-	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'g_triplet', ax = ax) #three_singlet, g_triplet
+	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'g_triplet', ax = ax)
 
 	return fig
 
 def secondary():
 	fig, ax = plt.subplots()
+	fig.subplots_adjust(top = 0.95, left = 0.11, right = 0.97)
 
 	das = Decay_Associated_Spectra()
 	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'f_triplet', ax = ax)
@@ -125,7 +123,7 @@ def secondary():
 
 
 if __name__ == '__main__':
-	#main()
-	secondary()
+	main()
+	#secondary()
 	plt.show()
 

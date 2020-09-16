@@ -84,11 +84,6 @@ class EPR_Spectrum():
 			ax.set_ylabel('Intensity / a.u.')
 			ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
 
-
-
-
-
-
 def main():
 
 	theoretical_spectrum = Constructed_IR_Spectrum('../Computational_Data/A_Intermediate/Full_Model/F-R2-R2-Down-GPOF-Disp_IR_Data.tsv', 30.)
@@ -122,6 +117,6 @@ def secondary():
 	return fig
 
 if __name__ == '__main__':
-	#main()
-	secondary()
+	main()
+	#secondary()
 	plt.show()

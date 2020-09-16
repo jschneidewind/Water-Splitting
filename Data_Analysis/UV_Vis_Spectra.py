@@ -310,9 +310,9 @@ def tertiary():
 	return fig
 
 if __name__ == '__main__':
-	#main()
+	main()
 	#secondary()
-	tertiary()
+	#tertiary()
 	plt.show()
 
 

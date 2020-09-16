@@ -137,6 +137,6 @@ def secondary():
 	return fig
 
 if __name__ == '__main__':
-	#main()
-	secondary()
+	main()
+	#secondary()
 	plt.show()
