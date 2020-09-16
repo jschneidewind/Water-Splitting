@@ -1,6 +1,6 @@
 # Overview
 
-This repository contains original data and analysis code for "Final Title (two photon water splitting".
+This repository contains original data and analysis code for "Two-photon water splitting at a molecular ruthenium complex".
 
 `Computational_Data` contains computational data for all computed intermediates (typically .log files and visualizations)
 
