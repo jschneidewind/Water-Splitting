@@ -28,14 +28,16 @@ To run data analysis code yourself it is easiest to clone the entire repository:
 git clone https://github.com/jschneidewind/Water-Splitting
 ```
 
+
+# License
+
 Copyright (c) Jacob Schneidewind
 
 All software is licensed under a MIT license (see `LICENSE` file).
 
-
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
-All of the files and their content (except software) is licensed under a
+All other files and their contents are licensed under a
 [Creative Commons Attribution 4.0 International License][cc-by]. (see `LICENSE-CC-BY`)
 
 [![CC BY 4.0][cc-by-image]][cc-by]
