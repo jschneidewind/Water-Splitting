@@ -15,13 +15,13 @@ from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
 
-def autolabel(rects, ax = plt):
+def autolabel(rects, ax = plt, offset = 0):
     """Attach a text label above each bar in *rects*, displaying its height."""
     for rect in rects:
         height = rect.get_height()
         ax.annotate('{}%'.format(int(height)),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3),  # 3 points vertical offset
+                    xytext=(offset, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha='center', va='bottom', fontsize = 12)
 
@@ -720,18 +720,28 @@ class Dual_Irradiation_Analysis:
 
 		ax.plot(data[:,0], data[:,1], '.')
 
-	def plot_hydride_yields(self, ax = plt):
+	def plot_hydride_yields(self, ax = plt, errorbars = False):
 
-		yields = np.array([[0., 6.], [1., 0.], [2., 10.1]])
+		yields = np.array([[0., 6., 1.276], [1., 0., 0.], [2., 10.1, 2.696]])
 		colors = ['darkblue', 'darkred', 'darkgreen']
 		labels = ['320 - 400 nm', '> 495 nm', '320 - 400 nm +\n> 495 nm']
 
 		for counter, i in enumerate(yields):
 			rect = ax.bar(i[0], i[1], color = colors[counter])
-			autolabel(rect, ax = ax)
+
+			if errorbars is True:
+				autolabel(rect, ax = ax, offset = 15)
+			else:
+				autolabel(rect, ax = ax)	
+
+		if errorbars is True:
+			ax.errorbar(yields[:,0], yields[:,1], yerr = yields[:,2:].flatten(), fmt = 'none', color = 'black', capsize = 20, capthick = 1.5, linewidth = 1.5)
+			ax.set_ylim(0., 13.2)
+
+		else:
+			ax.set_ylim(0.0, 11.)
 
 		if ax != plt:
-			ax.set_ylim(0.0, 11.)
 			ax.set_ylabel(r'Yield of $\bf{2-cis}$ / %')
 			ax.set_xticks(yields[:,0])
 			ax.set_xticklabels(labels)
@@ -947,7 +957,7 @@ class H2O2_Disproportionation:
 			ax.set_ylabel(r'$O_{2}$ / $\mu$mol $l^{-1}$')
 			ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
 
-def main(return_dual_irradiation = False, dual_and_intensity = False):
+def main(return_dual_irradiation = False, dual_and_intensity = False, errorbars = False):
 
 	excel_exps = convert_xlsx_to_experiments('../Experimental_Data/Liquid_Phase_O2_Data/Liquid_Phase_O2_Experiments_Metadata.xlsx')
 
@@ -969,7 +979,7 @@ def main(return_dual_irradiation = False, dual_and_intensity = False):
 	intensity.fit_intensity_data(square_law, 'full', False)
 
 	if dual_and_intensity is False:
-		dual_irradiation.plot_hydride_yields(ax = ax[0])
+		dual_irradiation.plot_hydride_yields(ax = ax[0], errorbars = errorbars)
 
 	else:
 		intensity.plot_results('fit', False, ax[0], photon_flux = actinometry.p_scaled[0])

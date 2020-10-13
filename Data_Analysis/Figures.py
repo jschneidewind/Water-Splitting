@@ -36,6 +36,12 @@ def Dual_Irradiation():
 
 	return fig
 
+def Dual_Irradiation_Errorbars():
+
+	fig, ax, _, _ = lp.main(errorbars = True)
+
+	return fig
+
 def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upper right'):
 
 	theoretical_spectra = uvvis.import_theoretical_spectra(return_f_triplet = True)
@@ -225,7 +231,7 @@ class Figure:
 		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
 
 
-figure = Figure(Free_Energy_Profile)
+figure = Figure(Dual_Irradiation_Errorbars)
 figure.show()
-#figure.save()
+figure.save()
 

@@ -29,6 +29,9 @@ The names used in manuscript and supporting information differ from those of the
 Original Name | Final Name
 --- | ----
 F-R2-R2-Down-Disp | [**A**]S<sub>0</sub>
+F-R2-R2-Up-Disp | [**A-RR**]S<sub>0</sub>
+F-R2-S2-Down-Disp | [**A-RS-1**]S<sub>0</sub>
+F-R2-S2-Up-Disp | [**A-RS-2**]S<sub>0</sub>
 3-Full-Disp | [**A-Mono**]S<sub>0</sub>
 G-Cis-R2-R2-Down-T- | [**B**]T<sub>0</sub>
 GMe-Cis-Mono-D-0 | [**B-Mono**]D<sub>0</sub> (Me model)
