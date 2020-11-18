@@ -121,9 +121,18 @@ def secondary():
 
 	return fig
 
+def tertiary():
+	fig, ax = plt.subplots()
+	fig.subplots_adjust(top = 0.95, left = 0.11, right = 0.97)
+
+	das = Decay_Associated_Spectra()
+	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'g_r2_r2', ax = ax)
+
+	return fig
 
 if __name__ == '__main__':
-	main()
+	#main()
 	#secondary()
+	tertiary()
 	plt.show()
 

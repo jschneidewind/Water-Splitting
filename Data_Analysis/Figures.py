@@ -168,6 +168,12 @@ def Decay_Associated_Spectra_f_triplet():
 
 	return fig
 
+def Decay_Associated_Spectra_g_r2_r2():
+
+	fig = das.tertiary()
+
+	return fig
+
 def Theoretical_UV_Vis_Spectra():
 
 	fig = uvvis.main()
@@ -231,7 +237,7 @@ class Figure:
 		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
 
 
-figure = Figure(Dual_Irradiation_Errorbars)
+figure = Figure(Decay_Associated_Spectra_g_r2_r2)
 figure.show()
 figure.save()
 

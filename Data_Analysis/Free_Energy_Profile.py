@@ -21,10 +21,12 @@ def get_name(name_label):
 
 class Free_Energy_Profile:
 
-	def __init__(self, name):
+	def __init__(self, name, index = None, legend_loc = (0.78, 0.17)):
 		self.name = name
+		self.index = index
+		self.legend_loc = legend_loc
 		self.import_data()
-		self.final_figure = self.plot_profile()
+		self.final_figure = self.plot_profile(index = self.index)
 
 	def import_data(self):
 
@@ -150,7 +152,7 @@ class Free_Energy_Profile:
 					sphere_ab = AnnotationBbox(spherebox, (pos + ox_offsets[counter], 0), frameon = False)
 					ax.add_artist(sphere_ab)
 
-	def plot_profile(self):
+	def plot_profile(self, index = None):
 
 		fig, ax = plt.subplots(figsize = (9, 6.5))   # 11, 6.5
 		fig.subplots_adjust(wspace = 0, hspace = 0, left = 0.07, right = 0.97, bottom = 0.05)
@@ -189,7 +191,14 @@ class Free_Energy_Profile:
            
 		index_list = list(self.data)
 
-		for counter, i in enumerate(self.data):
+		if index is None:
+			subset = index_list
+		else:
+			subset = index_list[:index]
+
+		data_subset = {k: self.data[k] for k in subset}
+
+		for counter, i in enumerate(data_subset):
 
 			energy = self.data[i]['Relative Energy (kcal/mol)']
 			model = self.data[i]['Model_Chemistry']
@@ -222,7 +231,7 @@ class Free_Energy_Profile:
 
 		handles, labels = ax.get_legend_handles_labels()
 		by_label = dict(zip(labels, handles))
-		ax.legend(by_label.values(), by_label.keys(), loc = (0.78, 0.17), title = r'$\bf{Model}$ $\bf{Chemistry}$')
+		ax.legend(by_label.values(), by_label.keys(), loc = self.legend_loc, title = r'$\bf{Model}$ $\bf{Chemistry}$')
 		ax.text(-0.035, 1.05, 'A', transform=ax.transAxes, size = 20, weight='bold')
 
 		return fig
@@ -325,7 +334,10 @@ class Conical_Intersections:
 
 if __name__ == '__main__':
 
-	profile = Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx')
+	profile = Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx', index = 13)
 	#conical = Conical_Intersections('../Computational_Data/Overview_Energies/CASSCF_Energies.xlsx', pcm = False)
+
+	profile.final_figure.savefig('/Users/Jacob/Documents/Water_Splitting/Dissertation/Figures/Energy_Profiles/Free_Energy_Profile_Index_13.pdf', transparent = True, dpi = 500)
+
 
 	plt.show()
