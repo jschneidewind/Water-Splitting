@@ -13,6 +13,7 @@ import Decay_Associated_Spectra as das
 import UV_Vis_Spectra as uvvis
 import IR_Analysis as ir
 import O2_Data_Plotting as o2
+import Solar_to_Hydrogen_Efficiency as sth
 
 def Intensity_Dual_Irradiation():
 	fig, ax, _, _ = lp.main(dual_and_intensity = True)
@@ -222,6 +223,17 @@ def Liquid_Phase_Analysis():
 
 	return fig
 
+def STH_Two_Photon():
+
+	fig = sth.secondary()
+
+	return fig
+
+def STH_Three_Photon():
+
+	fig = sth.tertiary()
+
+	return fig
 
 class Figure:
 
@@ -237,7 +249,7 @@ class Figure:
 		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
 
 
-figure = Figure(Decay_Associated_Spectra_g_r2_r2)
+figure = Figure(STH_Two_Photon)
 figure.show()
 figure.save()
 

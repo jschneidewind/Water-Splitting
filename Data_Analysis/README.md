@@ -19,4 +19,5 @@ Name | Contents
 `ODE_Fit_to_Data.py` | Visualization of kinetic NMR data and fitting of kinetic model
 `OO_Bond_Scans.py` | Visualization of O-O bond scan results as well as Scan-[**DE**]T<sub>0</sub> results
 `Photochemical_Reaction_ODE_Sim.py` | Photochemical kinetic model and fitting of model to experimental data
+`Solar_to_Hydrogen_Efficiency.py` | Model for calculation of maximum theoretical solar-to-hydrogen efficiencies
 `UV_Vis_Spectra.py` | Import, processing and visualization of theoretical and experimental UV/Vis as well as light source spectra

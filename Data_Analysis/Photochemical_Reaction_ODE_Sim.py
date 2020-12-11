@@ -27,7 +27,7 @@ def plot_func(data, t, plot_type, labels = ['A', 'B', 'C', 'D', 'E', 'F'], ax = 
 				ax.plot(t, i, '%s' % plot_type, color = colors[counter], markersize = 2, label = '{:.1e}'.format(labels[counter]))
 		else:
 			for counter, i in enumerate(data.T):
-				ax.plot(t, i, '%s' % plot_type, color = colors[counter], markersize = 2, label = '{:.1e}'.format(labels[counter]))
+				ax.plot(t, i, '%s' % plot_type, color = colors[counter], markersize = 2, label = labels[counter])#'{:.1e}'.format(labels[counter]))
 
 	else:
 
@@ -217,9 +217,11 @@ class ODE_Model:
 		if flux_level is None:
 			flux_level = self.flux_levels[-1]
 
+		self.p[0] = 20.
+
 		sol = self.ODE_biphotonic(self.p, flux_level, self.cross_section, self.initial_state, self.time)
 
-		plot_func(sol, self.time, '', ax = ax, transpose = True)
+		plot_func(sol, self.time, '', ax = ax, transpose = True, show_labels = True)
 
 
 def main():
@@ -239,6 +241,32 @@ def main():
 
 	return ODE_model
 
+def secondary():
+	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	ODE_model.fit_ODE_biphotonic(3000., 'Nelder-Mead')
+
+	print(ODE_model.flux_levels)
+
+	fig, ax = plt.subplots(figsize = (7,5))
+	fig.subplots_adjust(left = 0.2, right = 0.8)
+	#ODE_model.plot_ODE_fit(ax)
+
+	ODE_model.plot_full_ODE_solution(ax = ax, flux_level = 2.3e16)
+
+	print(ODE_model.p)
+
+	ax.legend()
+	
+	ODE_model.calculate_initial_rates(plotting = False)
+
+	ODE_model.initial_rate_tau_dependence(3000., np.logspace(-4, 2, 20))
+	
+	# ODE_model.plot_tau_initial_rate(ax = ax)
+	#ODE_model.plot_full_ODE_solution(ax = ax, flux_level = 4.15e17)
+
+	return ODE_model
+
 if __name__ == '__main__':
-	main()
+	#main()
+	secondary()
 	plt.show()
