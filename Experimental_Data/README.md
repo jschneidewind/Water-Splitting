@@ -2,7 +2,7 @@
 
 This directory contains experimental data.
 
-`Absorbance_Fluorescence_Data` contains UV/Vis and fluoresence spectra for complex **1**.
+`Absorbance_Fluorescence_Data` contains UV/Vis and fluoresence spectra for complex **1** as well as time-resolved UV/Vis data.
 
 `EPR_Data` contains EPR data for complex **1**.
 
@@ -33,6 +33,8 @@ This directory contains experimental data.
 `Chemical_Actinometry.xlsx` contains chemical actinometry data.
 
 `Dual_Irradiation_Experimental_Predicted_Rates.xlsx` contains a calculation comparing experimental excess initial rates from dual irradiation experiments with predictions from the photochemical kinetic model.
+
+`Intensity_Data_Quantum_Yield.xlsx` contains a calculation of overall quantum yield based on the intensity dataset.
 
 `ODE_Kinetic_Fit.xlsx` contains optimized parameters for the kinetic model fitted to kinetic NMR data.
 
