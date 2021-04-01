@@ -19,6 +19,28 @@ def get_name(name_label):
 
 	return name_string
 
+def plot_oxidation_state(data, i, ox_offset, ox_sphere_zoom, pos, ax, ox_sphere_y = 0, xycoords = 'data'):
+
+	ox_state = data[i]['Oxidation_State']
+	ox_offsets = {0: ox_offset, 1: -ox_offset}
+
+	if ox_state != 'No':
+
+		ox_split = str.split(ox_state, ' ')
+
+		for counter, i in enumerate(ox_split):
+
+			sphere = mpimg.imread('../Computational_Data/Images/%s' % i)
+			spherebox = OffsetImage(sphere, zoom = ox_sphere_zoom)
+
+			if len(ox_split) == 1:
+				sphere_ab = AnnotationBbox(spherebox, (pos, ox_sphere_y), frameon = False, xycoords = xycoords)
+				ax.add_artist(sphere_ab)
+
+			else:
+				sphere_ab = AnnotationBbox(spherebox, (pos + ox_offsets[counter], ox_sphere_y), frameon = False, xycoords = xycoords)
+				ax.add_artist(sphere_ab)
+
 class Free_Energy_Profile:
 
 	def __init__(self, name, index = None, legend_loc = (0.78, 0.17)):
@@ -26,13 +48,13 @@ class Free_Energy_Profile:
 		self.index = index
 		self.legend_loc = legend_loc
 		self.import_data()
-		self.final_figure = self.plot_profile(index = self.index)
+		self.final_figure, self.final_ax = self.plot_profile(index = self.index)
 
 	def import_data(self):
 
 		df = pd.read_excel(self.name, index_col = 0, dtype = object)
 
-		self.energies = df['Relative Energy (kcal/mol)'].to_numpy()
+		self.energies = df['Relative Energy (kJ/mol)'].to_numpy()
 		self.data = df.to_dict('index')		
 
 	def plot_plus_sign(self, int_type, target, pos, energy, plus_sign_offset, ax):
@@ -130,58 +152,38 @@ class Free_Energy_Profile:
 				ab = AnnotationBbox(imagebox, (pos + horiz_off, energy - image_offset + vert_off), frameon = False)
 				ax.add_artist(ab)
 
-	def plot_oxidation_state(self, i, ox_offset, ox_sphere_zoom, pos, ax):
-
-		ox_state = self.data[i]['Oxidation_State']
-		ox_offsets = {0: ox_offset, 1: -ox_offset}
-
-		if ox_state != 'No':
-
-			ox_split = str.split(ox_state, ' ')
-
-			for counter, i in enumerate(ox_split):
-
-				sphere = mpimg.imread('../Computational_Data/Images/%s' % i)
-				spherebox = OffsetImage(sphere, zoom = ox_sphere_zoom)
-
-				if len(ox_split) == 1:
-					sphere_ab = AnnotationBbox(spherebox, (pos, 0), frameon = False)
-					ax.add_artist(sphere_ab)
-
-				else:
-					sphere_ab = AnnotationBbox(spherebox, (pos + ox_offsets[counter], 0), frameon = False)
-					ax.add_artist(sphere_ab)
-
 	def plot_profile(self, index = None):
 
-		fig, ax = plt.subplots(figsize = (9, 6.5))   # 11, 6.5
-		fig.subplots_adjust(wspace = 0, hspace = 0, left = 0.07, right = 0.97, bottom = 0.05)
+		fig, ax = plt.subplots(figsize = (9, 8.5))   # oldest 11, 6.5    #  old 9, 6.5 
+		fig.subplots_adjust(wspace = 0, hspace = 0, left = 0.07, right = 0.97, bottom = 0.3, top = 0.92)  # old bottom = 0.05, top  = none
 		ax.spines['top'].set_color('none')
 		ax.spines['right'].set_color('none')
 		ax.set_xticks([]) 
+		ax.set_yticks(np.arange(0, 121*4.184, 100))  # only works for kcal/mol axis
 		ax.set_xlabel('Reaction Coordinate')
-		ax.set_ylabel(r'$\Delta$G / kcal mol$^{-1}$')
+		ax.set_ylabel(r'$\Delta$G$\degree$ / kJ mol$^{-1}$')
 		color_model_chemistry = {'Dimer': 'darkblue', 'Monomer (CASSCF)': 'darkred', 'Monomer': 'darkgreen'}
  
-		x_lim_low = -1.
+		x_lim_low = -1.2 # =1.
 		x_lim_high = 9
-		y_lim_low = -10.
-		y_lim_high = 139.
+		y_lim_low = -25.*4.184    #-10.
+		y_lim_high = 139.*4.184        # only works for kcal/mol axis
 		position = {'A': -0.5, 'B': 1, 'BC': 2, 'C': 3, 'CD': 4, 'D': 5, 'DE': 6, 'E': 7, 'F': 8.5}
 		
 		width = 0.3
-		arrow_space = 7.
-		text_offset = 3.
-		energy_offset = 5.
-		image_offset = 20.
+		arrow_space = 7.*4.184
+		text_offset = 3.*4.184
+		energy_offset = 5.*4.184
+		image_offset = 20.*4.184
 		offset_multi = 2.5
-		seperator_top = 10.
-		seperator_top_middle = 10.
-		seperator_energy = 10.
-		seperator_bottom = 40.
+		seperator_top = 10.*4.184
+		seperator_top_middle = 10.*4.184
+		seperator_energy = 10.*4.184
+		seperator_bottom = 40.*4.184
 		ox_offset = 0.35
 		ox_sphere_zoom = 0.023
-		plus_sign_offset = -25.
+		ox_sphere_y = -15.*4.184
+		plus_sign_offset = -25.*4.184
 		self.wavelength_offset = 0.37
 
 		ax.set_xlim(x_lim_low, x_lim_high)
@@ -200,7 +202,7 @@ class Free_Energy_Profile:
 
 		for counter, i in enumerate(data_subset):
 
-			energy = self.data[i]['Relative Energy (kcal/mol)']
+			energy = self.data[i]['Relative Energy (kJ/mol)']
 			model = self.data[i]['Model_Chemistry']
 			name_label = self.data[i]['Name']
 			seperator = self.data[i]['Line']
@@ -215,7 +217,7 @@ class Free_Energy_Profile:
 			prev_int = index_list[counter-1]
 			prev_int_type = str.split(prev_int, '_')[0]
 			prev_pos = position[prev_int_type]
-			prev_energy = self.data[prev_int]['Relative Energy (kcal/mol)']
+			prev_energy = self.data[prev_int]['Relative Energy (kJ/mol)']
 
 			self.plot_plus_sign(int_type, 'E', pos, energy, plus_sign_offset, ax)
 
@@ -227,14 +229,14 @@ class Free_Energy_Profile:
 
 			self.plot_image(i, pos, energy, image_offset, ax)
 
-			self.plot_oxidation_state(i, ox_offset, ox_sphere_zoom, pos, ax)
+			plot_oxidation_state(self.data, i, ox_offset, ox_sphere_zoom, pos, ax, ox_sphere_y = ox_sphere_y)
 
 		handles, labels = ax.get_legend_handles_labels()
 		by_label = dict(zip(labels, handles))
 		ax.legend(by_label.values(), by_label.keys(), loc = self.legend_loc, title = r'$\bf{Model}$ $\bf{Chemistry}$')
 		ax.text(-0.035, 1.05, 'A', transform=ax.transAxes, size = 20, weight='bold')
 
-		return fig
+		return fig, ax
 
 class Conical_Intersections:
 
@@ -270,34 +272,36 @@ class Conical_Intersections:
 		fig, ax = plt.subplots(figsize = (5, 6.5))
 
 		x_labels = []
-		fig.subplots_adjust(bottom=0.5)
-		fig.subplots_adjust(top=0.95)
+		fig.subplots_adjust(bottom=0.53, top = 0.95)  # old bottom = 0.5
 
 		positions = np.array([0, 1, 2, 3])
 
 		x_lim_low = -0.1
 		x_lim_high = 3.1
-		y_lim_low = -5.
+		y_lim_low = -5.*4.184
 
 		if self.pcm is False:
-			y_lim_high = 105.
+			y_lim_high = 105.*4.184
 		else:
-			y_lim_high = 110.
+			y_lim_high = 110.*4.184
 
 		roots = 3
 		idx = 5 + roots
-		path_offset = 2.9
+		path_offset = 2.9*4.184
 		image_offset = 0.1
 		image_offset_y = -0.4
 		sep_offset = -0.13
 		sep_end = -0.68
 		vert_sep_pos = -0.63
 
+		ox_offset = 0.35
+		ox_sphere_zoom = 0.023
+
 		ax.set_xlim(x_lim_low, x_lim_high)
 		ax.set_ylim(y_lim_low, y_lim_high)
-		ax.set_ylabel(r'Relative Energy / kcal mol$^{-1}$')
+		ax.set_ylabel(r'Relative Energy / kJ mol$^{-1}$')
 
-		roots_names = ('VDZ kcal Root 1', 'VDZ kcal Root 2', 'VDZ kcal Root 3')
+		roots_names = ('VDZ kJ/mol Root 1', 'VDZ kJ/mol Root 2', 'VDZ kJ/mol Root 3')
 		data = self.data_numpy[5:idx]
 
 		path = np.array([data[2][0], data[2][1], data[1][2], data[0][3]])
@@ -321,11 +325,16 @@ class Conical_Intersections:
 			if counter == 1 or counter == 3:
 				vert_seperator = ax.annotate('', xy = (sep_position, sep_end), xytext = (sep_position, sep_offset), xycoords = ax.transAxes, textcoords = ax.transAxes, arrowprops={'arrowstyle': '->', 'ls': 'dashed', 'color': 'grey'}, zorder = 1)
 
+			plot_oxidation_state(self.intermediates, i, ox_offset, ox_sphere_zoom, sep_position, ax , ox_sphere_y = self.intermediates[i]['Ox_Sphere_Y'], xycoords = ax.transAxes)
+
+
 		for counter, i in enumerate(data[::-1]):
 			ax.plot(positions, i, 'o-', label = r'$\bf{D_{%s}}$' % (roots - counter - 1), linewidth = 2.5, markersize = 10, zorder = 5)
 		
 		ax.plot(positions, path + path_offset, '--', color = 'black', label = 'Reaction Path', zorder = 10)
-		ax.text(-0.12, 1.025, 'B', transform=ax.transAxes, size = 20, weight='bold')
+		
+		if self.pcm is False:
+			ax.text(-0.12, 1.025, 'C', transform=ax.transAxes, size = 20, weight='bold')
 
 		plt.xticks(positions, x_labels)
 		ax.legend()
@@ -334,10 +343,10 @@ class Conical_Intersections:
 
 if __name__ == '__main__':
 
-	profile = Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx', index = 13)
+	profile = Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx', index = None)
 	#conical = Conical_Intersections('../Computational_Data/Overview_Energies/CASSCF_Energies.xlsx', pcm = False)
 
-	profile.final_figure.savefig('/Users/Jacob/Documents/Water_Splitting/Dissertation/Figures/Energy_Profiles/Free_Energy_Profile_Index_13.pdf', transparent = True, dpi = 500)
+	#profile.final_figure.savefig('/Users/Jacob/Documents/Water_Splitting/Dissertation/Figures/Energy_Profiles/Free_Energy_Profile_Index_13.pdf', transparent = True, dpi = 500)
 
 
 	plt.show()

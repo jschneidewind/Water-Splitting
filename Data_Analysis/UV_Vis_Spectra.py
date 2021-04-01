@@ -3,7 +3,7 @@ import pandas as pd
 import csv as csv
 from scipy import constants as con
 import find_nearest as fn
-from import_lamp_spectra import import_lamp_spectra
+from utility_functions import import_lamp_spectra
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.offsetbox import TextArea, DrawingArea, OffsetImage, AnnotationBbox

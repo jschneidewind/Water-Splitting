@@ -5,7 +5,7 @@ import io as io
 import find_nearest as fn
 from UV_Vis_Spectra import Constructed_UV_Vis_Spectrum, import_theoretical_spectra, import_plotting_parameters
 from Absorption_Spectrum_to_Dual_Irradiation import Absorption_Spectrum_Dual_Irradiation
-from import_lamp_spectra import import_lamp_spectra
+from utility_functions import import_lamp_spectra
 from scipy.optimize import least_squares
 from scipy.stats import linregress
 from scipy import constants as con
@@ -536,7 +536,7 @@ class Intensity_Analysis:
 			multiplier = '{:.2f}'.format(photon_flux/1e18)
 			#ax.set_xlabel(r'Photon Flux (320 - 500 nm) / $ s^{-1} \cdot$' + '{:.2e}'.format(photon_flux))
 	
-			ax.text(0.85, -0.12, r'$\times$' + multiplier + r'$\cdot$' + '{}'.format(fmt(1e18)), transform=ax.transAxes)
+			ax.text(0.92, -0.12, r'$\times$' + multiplier + r'$\cdot$' + '{}'.format(fmt(1e18)), transform=ax.transAxes)
 
 class Dual_Irradiation_Analysis:
 
@@ -699,9 +699,16 @@ class Dual_Irradiation_Analysis:
 		self.exp_rates_fitted = data
 		self.theoretical_rates_scaled = abs_spectrum_dual.fit_theoretical_rates_to_experimental(data)
 
-	def plot_theoretical_fit(self, ax = plt, name_fit = 'None'):
+	def plot_theoretical_fit(self, ax = plt, name_fit = 'None', split_label_lines = False):
 
-		ax.plot(self.theoretical_rates_scaled[:,0], self.theoretical_rates_scaled[:,1], color = 'green', label = r'Predicted for %s (scaled)' % name_fit, linewidth = 2)
+		if split_label_lines is True:
+			label = 'Predicted for\n{0}\n(scaled)'.format(name_fit)
+		else:
+			label = 'Predicted for {0} (scaled)'.format(name_fit)
+
+			# r'Predicted for %s (scaled)' % name_fit
+
+		ax.plot(self.theoretical_rates_scaled[:,0], self.theoretical_rates_scaled[:,1], color = 'green', label = label, linewidth = 2)
 		ax.plot(self.exp_rates_fitted[:,0], self.exp_rates_fitted[:,1], '.', color = 'black', markersize = 25, label = 'Datapoints')
 		
 		#print(self.exp_rates_fitted)
@@ -866,7 +873,7 @@ class Chemical_Actinometry:
 		scaling_factor = self.power_photon_flux_320_500[1]/(p*self.power_photon_flux_320_500[0])
 		p_scaled = p * scaling_factor
 
-		print(p_scaled)
+		#print(p_scaled)
 
 		self.photon_data_320_500 = data
 		self.fit = np.c_[x_full, y_fit]
@@ -957,7 +964,7 @@ class H2O2_Disproportionation:
 			ax.set_ylabel(r'$O_{2}$ / $\mu$mol $l^{-1}$')
 			ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
 
-def main(return_dual_irradiation = False, dual_and_intensity = False, errorbars = False):
+def main(return_dual_irradiation = False, dual_and_intensity = False, errorbars = False, return_intensity = False):
 
 	excel_exps = convert_xlsx_to_experiments('../Experimental_Data/Liquid_Phase_O2_Data/Liquid_Phase_O2_Experiments_Metadata.xlsx')
 
@@ -1000,6 +1007,9 @@ def main(return_dual_irradiation = False, dual_and_intensity = False, errorbars 
 
 	if return_dual_irradiation is True:
 		return dual_irradiation
+
+	elif return_intensity is True:
+		return intensity, actinometry
 
 	else:
 		return fig, ax, fig_b, ax_b

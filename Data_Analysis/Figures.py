@@ -3,10 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
+from utility_functions import insert_image
 import Liquid_Phase_O2_Analysis as lp
 import Free_Energy_Profile as fe
-import ODE_Fit_to_Data as ode
-import Photochemical_Reaction_ODE_Sim as photo
+import Reaction_ODE_Fitting as ode
+import Photochemical_ODE as photo
 import Gas_Phase_O2_Analysis as gas
 import OO_Bond_Scans as oo
 import Decay_Associated_Spectra as das
@@ -14,6 +15,7 @@ import UV_Vis_Spectra as uvvis
 import IR_Analysis as ir
 import O2_Data_Plotting as o2
 import Solar_to_Hydrogen_Efficiency as sth
+import Time_Resolved_UV_Vis as mcr
 
 def Intensity_Dual_Irradiation():
 	fig, ax, _, _ = lp.main(dual_and_intensity = True)
@@ -43,7 +45,7 @@ def Dual_Irradiation_Errorbars():
 
 	return fig
 
-def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upper right'):
+def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upper right', split_label_lines = False):
 
 	theoretical_spectra = uvvis.import_theoretical_spectra(return_f_triplet = True)
 	spectra_parameters = uvvis.import_plotting_parameters()
@@ -55,7 +57,7 @@ def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upp
 	fig.subplots_adjust(left = 0.2, bottom = 0.15, top = 0.95)
 
 	dual_irradiation.fit_theoretical_spectrum_to_synergy(theoretical_spectra[spectrum_for_fit], 'lr', 'lr', 3400., 1000.)
-	dual_irradiation.plot_theoretical_fit(ax, spectra_parameters[spectrum_for_fit]['Name'])
+	dual_irradiation.plot_theoretical_fit(ax, spectra_parameters[spectrum_for_fit]['Name'], split_label_lines = split_label_lines)
 
 	ax.legend(loc = legend_loc)
 
@@ -70,6 +72,34 @@ def Dual_Irradiation_f_triplet():
 def Dual_Irradiation_g_mono():
 
 	fig = Dual_Irradiation_f_singlet(spectrum_for_fit = 'g_mono', legend_loc = 'lower left')
+
+	return fig
+
+def Dual_Irradiation_g_trans_mono_three_trans_triplet():
+
+	theoretical_spectra = uvvis.import_theoretical_spectra(return_f_triplet = True)
+	spectra_parameters = uvvis.import_plotting_parameters()
+
+	dual_irradiation = lp.main(return_dual_irradiation = True)
+
+	fig, ax = plt.subplots(1,2, figsize = (9,4))
+	fig.subplots_adjust(left = 0.1, right = 0.98, bottom = 0.15, top = 0.9, wspace = 0.3)
+
+	spectrum_for_fit = 'g_trans_mono'
+
+	dual_irradiation.fit_theoretical_spectrum_to_synergy(theoretical_spectra[spectrum_for_fit], 'lr', 'lr', 3400., 1000.)
+	dual_irradiation.plot_theoretical_fit(ax[0], spectra_parameters[spectrum_for_fit]['Name'], split_label_lines = True)
+
+	spectrum_for_fit = 'three_trans_triplet'
+
+	dual_irradiation.fit_theoretical_spectrum_to_synergy(theoretical_spectra[spectrum_for_fit], 'lr', 'lr', 3400., 1000.)
+	dual_irradiation.plot_theoretical_fit(ax[1], spectra_parameters[spectrum_for_fit]['Name'], split_label_lines = True)	
+
+	ax[0].legend(loc = 'upper right')
+	ax[1].legend(loc = 'upper right')
+
+	ax[0].text(-0.12, 1.05, 'A', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.05, 'B', transform=ax[1].transAxes, size = 20, weight='bold')
 
 	return fig
 
@@ -103,6 +133,18 @@ def Free_Energy_Profile():
 
 	profile = fe.Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx')
 	fig = profile.final_figure
+	ax = profile.final_ax
+
+	return fig
+
+def Free_Energy_Profile_with_ChemDraw():
+
+	profile = fe.Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx')
+	fig = profile.final_figure
+	ax = profile.final_ax
+
+	ax.text(-0.035, -0.1, 'B', transform=ax.transAxes, size = 20, weight='bold')
+	insert_image('../Figures/ChemDraw/Mechanism_no_ox_labels.png', 0.5, -0.27, 0.15, ax)
 
 	return fig
 
@@ -130,7 +172,7 @@ def ODE_fit():
 
 def Photo_ODE_Model():
 
-	ode_model = photo.main()
+	ode_model, _, _ = photo.main()
 	fig, ax = plt.subplots(1,2, figsize = (11.5, 4.5))
 	fig.subplots_adjust(wspace = 0.6)
 
@@ -235,6 +277,111 @@ def STH_Three_Photon():
 
 	return fig
 
+def MCR_Heatmap():
+
+	fig = mcr.MCR_heatmap()
+
+	return fig
+
+def MCR_Results():
+
+	fig = mcr.MCR_results()
+
+	return fig
+
+def UVVis_Data():
+
+	fig = mcr.UVVis_data()
+
+	return fig
+
+def ODE_Fit_to_MCR():
+
+	fig = mcr.ODE_fit_to_MCR()
+
+	return fig
+
+def Intensity_Photo_ODE():
+
+	intensity, actinometry = lp.main(return_intensity = True)
+	ode_model, _, _ = photo.main()
+
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,4))
+	fig.subplots_adjust(wspace = 0.25, bottom = 0.15, left = 0.09, right = 0.82) 
+
+	intensity.plot_results('fit', False, ax[0], photon_flux = actinometry.p_scaled[0])
+	intensity.plot_results('average', False, ax[0], photon_flux = actinometry.p_scaled[0])
+	
+	ode_model.plot_ODE_fit(ax = ax[1])
+
+	ax[0].text(-0.12, 1.05, 'A', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.05, 'B', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[1].text(1.05, 0.42, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	insert_image('../Figures/ChemDraw/Photochemical_Kinetic_Scheme.png', 1.3, 0.17, 0.22, ax[1])
+
+	return fig
+
+def Bimolecular_Photo_ODE():
+
+	fig, ax = photo.Bimolecular()
+
+	insert_image('../Figures/ChemDraw/Bimolecular_Reaction.png', -0.35, 1.3, 0.28, ax[1])
+
+	ax[1].text(-0.87, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Three_Photon_Irreversible():
+
+	fig, ax = photo.Three_photon_mechanism_irreversible()
+
+	insert_image('../Figures/ChemDraw/Sequential_Three_Photon.png', -0.35, 1.3, 0.28, ax[1])
+
+	ax[1].text(-0.97, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Three_Photon_Irreversible_Differential_Evolution():
+
+	fig, ax = photo.Three_photon_mechanism_irreversible(differential_evolution_result = True)
+
+	insert_image('../Figures/ChemDraw/Sequential_Three_Photon.png', -0.35, 1.3, 0.28, ax[1])
+
+	ax[1].text(-0.97, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Three_Photon_Reversible():
+
+	fig, ax = photo.Three_photon_mechanism_reversible()
+
+	insert_image('../Figures/ChemDraw/Sequential_Three_Photon_Reversible.png', -0.35, 1.25, 0.28, ax[1])
+
+	ax[1].text(-0.97, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Three_Photon_Reversible_Cubic():
+
+	fig, ax = photo.Three_photon_mechanism_reversible_cubic()
+
+	insert_image('../Figures/ChemDraw/Sequential_Three_Photon_Reversible.png', -0.35, 1.25, 0.28, ax[1])
+
+	ax[1].text(-0.97, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
 class Figure:
 
 	def __init__(self, function):
@@ -249,7 +396,9 @@ class Figure:
 		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
 
 
-figure = Figure(STH_Two_Photon)
+figure = Figure(Three_Photon_Irreversible_Differential_Evolution)
 figure.show()
-figure.save()
+#figure.save()
+
+
 

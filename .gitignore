@@ -1,6 +1,11 @@
 # Redundant Files
 Redundant/
 
+# Folders
+EES/
+Nature/
+Science/
+
 # docx Files
 *.docx
 

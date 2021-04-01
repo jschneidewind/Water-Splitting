@@ -41,7 +41,7 @@ class OO_Bond_Scan:
 			ab = AnnotationBbox(imagebox, (x_lim - horiz_off, y_lim + vert_off), frameon = False, xycoords = xycoords)
 			ax.add_artist(ab)
 
-	def plot_data(self, ax = plt, label = None, i = 0, bond_length = 'Bond Length', energy = 'Energy (kcal/mol)', xlabel = r'O-O Distance / $\AA$', x_lim_upper = 2.95, x_lim_lower = 1.3, image_path = '../Computational_Data/Images/', plot_image = True, markersize = 10., plot_grid = True):
+	def plot_data(self, ax = plt, label = None, i = 0, bond_length = 'Bond Length', energy = 'Energy (kJ/mol)', xlabel = r'O-O Distance / $\AA$', x_lim_upper = 2.95, x_lim_lower = 1.3, image_path = '../Computational_Data/Images/', plot_image = True, markersize = 10., plot_grid = True):
 
 		if label is None:
 			label = self.dict['Name'][i]
@@ -51,7 +51,7 @@ class OO_Bond_Scan:
 		if ax != plt:
 
 			ax.set_xlabel(xlabel)
-			ax.set_ylabel(r'Relative Energy / kcal mol$^{-1}$')
+			ax.set_ylabel(r'Relative Energy / kJ mol$^{-1}$')
 			ax.legend()
 
 			ax.set_xlim(x_lim_upper, x_lim_lower)
@@ -108,10 +108,10 @@ def secondary():
 	image_pos = 0.5
 	arrow_cut_off = 0.5
 
-	de_scan.plot_data(ax = ax, bond_length = 'Bond Length (A)', energy = 'Gas Phase Energy (kcal/mol)', x_lim_upper = x_lim_upper, x_lim_lower = x_lim_lower, 
+	de_scan.plot_data(ax = ax, bond_length = 'Bond Length (A)', energy = 'Gas Phase Energy (kJ/mol)', x_lim_upper = x_lim_upper, x_lim_lower = x_lim_lower, 
 					  xlabel = r'Ru-O Distance / $\AA$', plot_image = False, label = 'Gas Phase Energy', markersize = 7, plot_grid = True)
 
-	de_scan.plot_data(ax = ax, bond_length = 'Bond Length (A)', energy = 'SMD Energy (kcal/mol)', x_lim_upper = x_lim_upper, x_lim_lower = x_lim_lower, 
+	de_scan.plot_data(ax = ax, bond_length = 'Bond Length (A)', energy = 'SMD Energy (kJ/mol)', x_lim_upper = x_lim_upper, x_lim_lower = x_lim_lower, 
 					  xlabel = r'Ru-O Distance / $\AA$', plot_image = False, label = 'SMD Energy', markersize = 7, plot_grid = True)
 
 	for i in de_scan.dict['Image']:

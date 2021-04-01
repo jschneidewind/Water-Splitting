@@ -1,9 +1,6 @@
 import numpy as np
 from scipy import constants as con
-from scipy.optimize import minimize
-from scipy.optimize import dual_annealing
-from scipy.optimize import differential_evolution
-from scipy.optimize import shgo
+from scipy.optimize import minimize, dual_annealing, differential_evolution, shgo
 import matplotlib.pyplot as plt
 import find_nearest as fn
 from matplotlib.colors import BoundaryNorm
@@ -198,25 +195,33 @@ class Efficiency:
 		im_a.set_edgecolor('face')
 		colorbar = fig.colorbar(im_a, ax=ax)
 
-		colorbar.set_label('STH / %')
+		colorbar.set_label('STH')
 		ax.set_xlabel(r'Longest absorption wavelength [$\bf{A}$] / nm')
 		ax.set_ylabel(r'Longest absorption wavelength [$\bf{B}$] / nm')
 
 		return fig, ax
 
-	def plot_solar_irradiance(self, start, end, ax = plt):
+	def plot_solar_irradiance(self, start, end, ax = plt, offsets = None):
 
-		idx_plot = fn.find_nearest(self.am15g_flux, (start, end))
+		if offsets == None:
+			# offsets = np.array([-1, 0, 1]) * 80.
+			offsets = np.zeros(len(self.optimal_wavelengths))
+
+		if end < self.optimal_wavelengths[-1]:
+			idx_plot = fn.find_nearest(self.am15g_flux, (start, self.optimal_wavelengths[-1]))
+
+		else:
+			idx_plot = fn.find_nearest(self.am15g_flux, (start, end))
+
+
 		data = self.am15g_flux[idx_plot[0]:idx_plot[1]]
 
 		ax.plot(data[:,0], data[:,1], color = 'black', linewidth = 1., label = 'AM 1.5 G')
 
 		idx_segments = np.asarray(fn.find_nearest(self.am15g_flux, self.optimal_wavelengths))
-		full_idx_segments = np.insert(idx_segments, 0, 200)
+		full_idx_segments = np.insert(idx_segments, 0, start)
 		midpoints = (full_idx_segments[1:] + full_idx_segments[:-1]) / 2
 		midpoints = midpoints.astype(int)
-
-		offsets = np.array([-1, 0, 1]) * 80.
 
 		segments = np.split(self.am15g_flux, idx_segments)
 
@@ -392,11 +397,26 @@ def quinary():
 	efficiency.global_optimization(np.array([1., 1., 1., 1.]), method = method, print_output = True)
 	efficiency.global_optimization(np.array([2., 2., 2., 2.]), method = method, print_output = True)
 
+def senary():
+
+	gibbs_energy = Energy(4*1.229, eV)
+	excess_energy = Energy(17.5, kcalmol)
+
+	efficiency = Efficiency(gibbs_energy, excess_energy)
+	efficiency.global_optimization(np.array([4., 4.]), print_output = True)
+
+	fig, ax = plt.subplots()
+
+	efficiency.plot_solar_irradiance(200., 1000., ax = ax, offsets = [0, -80])
+
+	return fig
+
 
 if __name__ == '__main__':
 	#main()
-	secondary()
+	#secondary()
 	#tertiary()
 	#quaternary()
 	#quinary()
+	senary()
 	plt.show()
