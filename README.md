@@ -18,7 +18,7 @@ We actively encourage others to work on this interesting new avenue in water spl
 
 # Dependencies
 
-Python code (Python >3.7) requires the following libraries: numpy, scipy, matplotlib, pandas, pathlib, math, io, os, re and csv.
+Python code (Python >3.7) requires the following libraries: numba, numpy, scipy, matplotlib, pandas, pathlib, csv and pymcr.
 
 # Installation
 

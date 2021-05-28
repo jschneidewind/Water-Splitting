@@ -30,6 +30,12 @@ This directory contains experimental data.
 
 `Photographs` contains photographs of experimental set-ups.
 
+`Picosecond_Spectroscopy` contains data and decays associated spectra for ultrafast spectroscopy experiments (TA = transient absorption, MA = magic angle polarization, PA = parallel angle polarization, SE = orthogonal angle polarization).
+
+`20120613_Lumatec2_Spektren.txt` contain spectral distribution for Hg light source.
+
+`ASTMG173.csv` is a reference spectrum for the AM1.5G solar spectrum.
+
 `Chemical_Actinometry.xlsx` contains chemical actinometry data.
 
 `Dual_Irradiation_Experimental_Predicted_Rates.xlsx` contains a calculation comparing experimental excess initial rates from dual irradiation experiments with predictions from the photochemical kinetic model.
