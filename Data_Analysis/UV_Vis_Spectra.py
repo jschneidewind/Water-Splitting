@@ -3,7 +3,7 @@ import pandas as pd
 import csv as csv
 from scipy import constants as con
 import find_nearest as fn
-from utility_functions import import_lamp_spectra
+from utility_functions import import_lamp_spectra, insert_image
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.offsetbox import TextArea, DrawingArea, OffsetImage, AnnotationBbox
@@ -52,7 +52,9 @@ def import_theoretical_spectra(return_transitions = False, return_f_triplet = Fa
 					   'g_mono': import_uv_vis_txt('../Computational_Data/B_Intermediate/Mono/G-Cis-Mono-D-0-GP-TD-SMD_uvvis.txt', return_transitions = return_transitions),
 					   'g_trans_mono': import_uv_vis_txt('../Computational_Data/B_Intermediate/Trans_Isomer/Mono/G-Mono-D-0-GP-TD-SMD_uvvis.txt', return_transitions = return_transitions),
 					   'three_hcis': import_uv_vis_txt('../Computational_Data/B_Intermediate/Mono/3-HCis-GP-D-0-TD-SMD-NStates25_uvvis.txt', return_transitions = return_transitions),
-					   'three_trans_triplet': import_uv_vis_txt('../Computational_Data/B_Intermediate/Trans_Isomer/Mono/3-HTrans-GP-D-0-TD-SMD_uvvis_full.txt', return_transitions = return_transitions)
+					   'three_trans_triplet': import_uv_vis_txt('../Computational_Data/B_Intermediate/Trans_Isomer/Mono/3-HTrans-GP-D-0-TD-SMD_uvvis_full.txt', return_transitions = return_transitions),
+			           '2-trans-B': import_uv_vis_txt('../Computational_Data/F_Intermediate/Trans-B/2-Trans-B-GP-TD-SMD_uvvis.txt', return_transitions = return_transitions),
+			           '2-trans-A': import_uv_vis_txt('../Computational_Data/F_Intermediate/Trans-A/2-Trans-A-GP-TD-SMD_uvvis.txt', return_transitions = return_transitions)
 			           }
 		
 		return theoretical
@@ -82,9 +84,9 @@ def calc_molar_attenuation(absorbance, concentration, pathlength):
 
 	return absorbance/(concentration*pathlength)
 
-def import_convert_UV_Vis(name = 'JS_594_40ms_100acc.csv', concentration = 4e-5, pathlength = 1.):
+def import_convert_UV_Vis(name = '/UV_Vis_Complex_1/JS_594_40ms_100acc.csv', concentration = 4e-5, pathlength = 1., delimiter = ';'):
 
-	data = np.loadtxt('../Experimental_Data/Absorbance_Fluorescence_Data/UV_Vis_Complex_1/' + name, delimiter = ';')
+	data = np.loadtxt('../Experimental_Data/Absorbance_Fluorescence_Data/' + name, delimiter = delimiter)
 
 	wavelength = data[:,0]
 	molar_attenuation = calc_molar_attenuation(data[:,1], concentration, pathlength)
@@ -298,7 +300,7 @@ def secondary():
 
 	ax.legend(plots, labels)
 
-	return fig
+	return fig, ax_a
 
 def tertiary():
 
@@ -309,10 +311,54 @@ def tertiary():
 
 	return fig
 
+def two_trans_uv_vis():
+
+	theoretical_spectra = import_theoretical_spectra(return_transitions = True)
+	plotting_parameter = import_plotting_parameters()
+
+
+	fig, ax = plt.subplots()
+	fig.subplots_adjust(right = 0.75)
+
+	plotting_range = [230, 800]
+
+	theoretical = Theoretical_UV_Vis_Spectrum(theoretical_spectra, '2-trans-B', plotting_parameter)
+	plot_a, ax_a = theoretical.plot_uv_vis(ax = ax, scaling_factor = 0.4, plotting_image = False, 
+										linewidth = 1., oscillator_ylim = True, 
+										label = 'Predicted Absorbance for\n' + r'[$\bf{F-Trans-Up}$]S$_{0}$ (scaled)', 
+										color = 'black', plotting_range = plotting_range)
+
+	Milstein_2009_data = import_convert_UV_Vis(name = 'UV_Vis_Complex_2_Milstein2009/Milstein_2009_Complex_2_UV_Vis.txt',
+										concentration = 4.26e-4, pathlength = 1, delimiter = ' ')
+
+	idx_uvvis = fn.find_nearest(Milstein_2009_data, plotting_range)
+	data_plot = Milstein_2009_data[idx_uvvis[0]:idx_uvvis[1]]
+
+	plot_b = ax.plot(data_plot[:,0], data_plot[:,1], label = r'Absorbance $\bf{2-trans}$ (Milstein, 2009)', color = 'darkgreen', linewidth = 2.)
+
+
+	plots = plot_a + plot_b
+	labels = [p.get_label() for p in plots]
+	colors = [p.get_color() for p in plots]
+
+	ax.set_ylabel(r'$ \epsilon $ / $M^{-1} cm^{-1}$')
+
+	ax.yaxis.label.set_color(colors[1])
+	ax.tick_params(axis = 'y', colors = colors[1])
+
+	insert_image('../Computational_Data/F_Intermediate/Trans-B/2-Full-Trans-B-GPNMR-NoSpin.png', 0.63, 0.5, 0.22, ax)
+
+	ax.legend(plots, labels)
+
+	return fig
+
+
+
 if __name__ == '__main__':
-	main()
+	#main()
 	#secondary()
 	#tertiary()
+	two_trans_uv_vis()
 	plt.show()
 
 

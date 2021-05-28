@@ -43,6 +43,9 @@ def Dual_Irradiation_Errorbars():
 
 	fig, ax, _, _ = lp.main(errorbars = True)
 
+	insert_image('../Computational_Data/Images/B_mono_image.png', 0.07, 0.45, 0.07, ax[1])
+	ax[1].annotate(r'[$\bf{B-Mono-Up}$]D$_{0}$', xy = (0.09, 0.24), xycoords = 'axes fraction')
+
 	return fig
 
 def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upper right', split_label_lines = False):
@@ -61,17 +64,20 @@ def Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_singlet', legend_loc = 'upp
 
 	ax.legend(loc = legend_loc)
 
-	return fig
+	return fig, ax
 
 def Dual_Irradiation_f_triplet():
 
-	fig = Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_triplet')
+	fig, ax = Dual_Irradiation_f_singlet(spectrum_for_fit = 'f_triplet')
 
 	return fig 
 
 def Dual_Irradiation_g_mono():
 
-	fig = Dual_Irradiation_f_singlet(spectrum_for_fit = 'g_mono', legend_loc = 'lower left')
+	fig, ax = Dual_Irradiation_f_singlet(spectrum_for_fit = 'g_mono', legend_loc = 'lower left')
+
+	insert_image('../Computational_Data/Images/B_mono_image.png', 0.04, 0.425, 0.07, ax)
+	ax.annotate(r'[$\bf{B-Mono}$]D$_{0}$', xy = (0.09, 0.24), xycoords = 'axes fraction')
 
 	return fig
 
@@ -100,6 +106,12 @@ def Dual_Irradiation_g_trans_mono_three_trans_triplet():
 
 	ax[0].text(-0.12, 1.05, 'A', transform=ax[0].transAxes, size = 20, weight='bold')
 	ax[1].text(-0.12, 1.05, 'B', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	insert_image('../Computational_Data/Images/B_trans_mono_image.png', 0.03, 0.225, 0.06, ax[0])
+	ax[0].annotate(r'[$\bf{B-Mono-Trans}$]D$_{0}$', xy = (0.02, 0.06), xycoords = 'axes fraction')
+
+	insert_image('../Computational_Data/Images/B_trans_mono_image.png', 0.03, 0.225, 0.06, ax[1])
+	ax[1].annotate(r'[$\bf{B-Mono-Trans-Up}$]D$_{0}$', xy = (0.02, 0.06), xycoords = 'axes fraction')
 
 	return fig
 
@@ -201,19 +213,25 @@ def OO_Scans():
 
 def Decay_Associated_Spectra():
 
-	fig = das.main()
+	fig, ax = das.main()
+
+	insert_image('../Computational_Data/Images/B_trans_image.png', 0.45, 0.19, 0.058, ax)
+	ax.annotate(r'[$\bf{B-Trans}$]T$_{0}$', xy = (0.53, 0.025), xycoords = 'axes fraction')
 
 	return fig
 
 def Decay_Associated_Spectra_f_triplet():
 
-	fig = das.secondary()
+	fig, ax = das.secondary()
 
 	return fig
 
 def Decay_Associated_Spectra_g_r2_r2():
 
-	fig = das.tertiary()
+	fig, ax = das.tertiary()
+
+	insert_image('../Computational_Data/Images/B_image.png', 0.5, 0.19, 0.052, ax)
+	ax.annotate(r'[$\bf{B}$]T$_{0}$', xy = (0.47, 0.025), xycoords = 'axes fraction')
 
 	return fig
 
@@ -243,7 +261,10 @@ def EPR_Spectrum():
 
 def UV_Vis_Fluorescence():
 
-	fig = uvvis.secondary()
+	fig, ax = uvvis.secondary()
+
+	insert_image('../Computational_Data/Images/A_image.png', 0.75, 0.5, 0.055, ax)
+	ax.annotate(r'[$\bf{A}$]S$_{0}$', xy = (0.72, 0.29), xycoords = 'axes fraction')
 
 	return fig
 
@@ -326,9 +347,9 @@ def Bimolecular_Photo_ODE():
 
 	fig, ax = photo.Bimolecular()
 
-	insert_image('../Figures/ChemDraw/Bimolecular_Reaction.png', -0.35, 1.3, 0.28, ax[1])
+	insert_image('../Figures/ChemDraw/Bimolecular_Reaction_Parallel.png', -0.35, 1.26, 0.28, ax[1])
 
-	ax[1].text(-0.87, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.87, 1.40, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
 	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
 	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
 
@@ -382,6 +403,54 @@ def Three_Photon_Reversible_Cubic():
 
 	return fig
 
+def Two_Trans_UV_Vis_Milstein():
+
+	fig = uvvis.two_trans_uv_vis()
+
+	return fig
+
+def Intensity_Linear_Fit():
+
+	fig = lp.flux_rate_relationship_linear_fit()
+
+	return fig
+
+def Simultanous_Two_Photon_Bimolecular():
+
+	fig, ax = photo.simultanous_two_photon_bimolecular()
+
+	insert_image('../Figures/ChemDraw/Bimolecular_Reaction_Two_Photon.png', -0.35, 1.25, 0.28, ax[1])
+
+	ax[1].text(-0.87, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Simultanous_Two_Photon_Bimolecular_Quartic():
+
+	fig, ax = photo.simultanous_two_photon_bimolecular_quartic()
+
+	insert_image('../Figures/ChemDraw/Bimolecular_Reaction_Two_Photon.png', -0.35, 1.25, 0.28, ax[1])
+
+	ax[1].text(-0.87, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
+def Simultanous_Two_Photon_Bimolecular_Irreversible():
+
+	fig, ax = photo.simultanous_two_photon_bimolecular_irreversible()
+
+	insert_image('../Figures/ChemDraw/Bimolecular_Reaction_Two_Photon_Irreversible_Thermal.png', -0.35, 1.25, 0.28, ax[1])
+
+	ax[1].text(-0.87, 1.33, 'A', transform=ax[1].transAxes, size = 20, weight='bold')
+	ax[0].text(-0.12, 1.02, 'B', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.12, 1.02, 'C', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
 class Figure:
 
 	def __init__(self, function):
@@ -393,12 +462,10 @@ class Figure:
 		plt.show()
 
 	def save(self):
-		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 500)
+		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 650)
 
 
-figure = Figure(Three_Photon_Irreversible_Differential_Evolution)
+figure = Figure(Dual_Irradiation_g_trans_mono_three_trans_triplet)
 figure.show()
 #figure.save()
-
-
 

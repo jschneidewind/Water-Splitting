@@ -19,16 +19,20 @@ def insert_image(path, x, y, zoom, ax):
 	ab = AnnotationBbox(imagebox, (x, y), frameon = False, xycoords = ax.transAxes)
 	ax.add_artist(ab)
 
-def scientific_notation(values):
+def format_scientific(value):
 
 	f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
 	g = lambda x,pos : "${}$".format(f._formatSciNotation('%1.1e' % x))
 	fmt = mticker.FuncFormatter(g)
 
+	return fmt(value)
+
+def scientific_notation(values):
+
 	output = []
 
 	for value in values:
-		formatted = fmt(value)
+		formatted = format_scientific(value)
 		output.append(formatted)
 
 	return output

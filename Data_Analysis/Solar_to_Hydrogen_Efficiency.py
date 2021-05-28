@@ -8,6 +8,7 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
+from timeit import default_timer as timer
 
 def as_si(x, ndp):
     s = '{x:0.{ndp:d}e}'.format(x=x, ndp=ndp)
@@ -107,7 +108,7 @@ class Efficiency:
 
 		If delta_G is 237 kJ/mol, reactions_per_second refers to H2 mol/s
 		If delta_G is 474 kJ/mol,reactions_per_second refers to 2 H2 mol/s (input value is halve)
-		Arbitrary delta_G value can be sued to account for partial water splitting reaction'''
+		Arbitrary delta_G value can be used to account for partial water splitting reaction'''
 
 		return (reactions_per_second * delta_G)/(irradiance * area)
 
@@ -137,7 +138,7 @@ class Efficiency:
 				photons_per_second = spectra_integration(self.am15g_flux, 0., wavelength) / con.Avogadro
 			else:
 				photons_per_second = spectra_integration(self.am15g_flux, wavelengths[counter-1], wavelength) / con.Avogadro
-			
+
 			photons_per_second_list.append(photons_per_second/photons)
 
 		reactions_per_second = pop * min(photons_per_second_list)
@@ -269,7 +270,7 @@ class Efficiency:
 			p = shgo(func=self.calc_efficiency, bounds = bounds, args =(number_photons, True))
 
 		else:
-			p = differential_evolution(func=self.calc_efficiency, bounds = bounds, args = (number_photons, True))
+			p = differential_evolution(func=self.calc_efficiency, bounds = bounds, args = (number_photons, True), workers = 1)
 
 		self.optimal_wavelengths = p.x
 		self.optimal_efficiency = -p.fun
@@ -353,6 +354,29 @@ def secondary():
 
 	return fig
 
+def test():
+	'''Maximum STH for H2O2 pathway'''
+
+	#gibbs_energy = Energy(82.7, kcalmol)
+	# gibbs_energy = Energy(2*1.229, eV)
+
+
+
+	gibbs_energy = Energy(2*1.78, eV)
+
+
+
+	excess_energy = Energy(17.5, kcalmol)
+
+
+	efficiency = Efficiency(gibbs_energy, excess_energy)
+
+	efficiency.global_optimization(np.array([1., 1.]), method = 'differential evolution', print_output = True)
+
+	print(efficiency.calc_efficiency(np.array([455.30270576, 516.52728081]), np.array([1., 1.])))
+	print(efficiency.calc_efficiency(np.array([455.30270576, 516.52728081]), np.array([1., 1.]), return_reactions = True))
+
+
 def tertiary():
 	gibbs_energy = Energy(4*1.229, eV)
 	excess_energy = Energy(17.5, kcalmol)
@@ -386,6 +410,8 @@ def quinary():
 
 	efficiency = Efficiency(gibbs_energy, excess_energy)
 
+	start = timer()
+
 	efficiency.global_optimization(np.array([2.]), method = method, print_output = True)
 	efficiency.global_optimization(np.array([4.]), method = method, print_output = True)
 	efficiency.global_optimization(np.array([1., 1.]), method = method, print_output = True)
@@ -396,6 +422,10 @@ def quinary():
 	efficiency.global_optimization(np.array([1., 1., 2.]), method = method, print_output = True)
 	efficiency.global_optimization(np.array([1., 1., 1., 1.]), method = method, print_output = True)
 	efficiency.global_optimization(np.array([2., 2., 2., 2.]), method = method, print_output = True)
+
+	end = timer()
+
+	print('Time:', end - start)
 
 def senary():
 
@@ -418,5 +448,6 @@ if __name__ == '__main__':
 	#tertiary()
 	#quaternary()
 	#quinary()
-	senary()
+	#senary()
+	test()
 	plt.show()

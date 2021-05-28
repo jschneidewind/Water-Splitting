@@ -9,57 +9,22 @@ rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
 from timeit import default_timer as timer
 from utility_functions import plot_func
+from numba import njit
+from numba.typed import List
+import pprint
 
 def convert_letters_to_numbers(string):
 
-	string = str.split(string, '+ ')
+	string = str.split(string, '+')
 
 	output = []
 
-	for i in range(len(string)):
-
-		character = string[i].strip()
+	for item in string:
+		character = item.strip(' ')
 		value = ord(character) - 65
 		output.append(value)
 
 	return np.asarray(output)
-
-def interpret_single_string(string):
-
-	reaction_k = str.split(string, ', ')
-	reaction = reaction_k[0]
-	k = reaction_k[1]
-
-	try:
-		hv = reaction_k[2]
-		sigma = reaction_k[3]
-	except IndexError:
-		hv = 'hv0'
-		sigma = 'sigma0'
-
-	reaction_complete = str.split(reaction, '> ')
-
-	reactants = reaction_complete[0]
-	products = reaction_complete[1]
-
-	reac = convert_letters_to_numbers(reactants)
-	prod = convert_letters_to_numbers(products)
-
-	k_num = np.asarray([int(re.findall(r'\d+', k)[0]) - 1])
-	hv_num =  np.asarray([int(re.findall(r'\d+', hv)[0]) - 1])
-	sigma_num =  np.asarray([int(re.findall(r'\d+', sigma)[0]) - 1])
-
-	return [reac, prod, k_num, hv_num, sigma_num]
-
-def ODE_string_interpreter_complete(string):
-
-	reactions = []
-
-	for i in string:
-		converted = interpret_single_string(i)
-		reactions.append(converted)
-
-	return np.asarray(reactions)
 
 def correct_idx(idx, shapes):
 
@@ -77,16 +42,48 @@ def correct_idx(idx, shapes):
 
 	return np.asarray(idx_corrected, dtype='int')
 
-def consumption_production(matrix, mode, reaction_list_provided = False, reaction_list = None):
+def interpret_single_string(string):
+
+	reaction_and_non_reactant_part = str.split(string, ',')
+	reaction = reaction_and_non_reactant_part[0]
+	non_reactant_part = reaction_and_non_reactant_part[1:]
+
+	reactants, products = str.split(reaction, '>')
+
+	non_reactant_components = []
+
+	for item in non_reactant_part:
+		item = item.strip(' ')
+
+		component_type = re.sub(r'\d+', '', item)
+		index = int(re.findall(r'\d+', item)[0]) - 1 # converting from 1 to 0 indexing
+
+		non_reactant_components.append([component_type, index])
+
+	return [convert_letters_to_numbers(reactants), 
+			convert_letters_to_numbers(products)], non_reactant_components
+
+def ODE_string_interpreter_complete(string):
+
+	reactions = []
+	non_reactant_components = {}
+
+	for counter, i in enumerate(string):
+		reaction, non_reactant_component = interpret_single_string(i)
+		reactions.append(reaction)
+
+		non_reactant_components[counter] = non_reactant_component
+
+	return np.asarray(reactions), non_reactant_components
+
+def consumption_production(matrix, non_reactant_components, mode, reaction_list_provided = False, reaction_list = None):
 
 	number_reactants = np.amax(np.r_[np.concatenate(matrix[:,0]), np.concatenate(matrix[:,1])])
 
 	if reaction_list_provided == False:
-
 		reactions = []
 		for i in range(number_reactants+1):
 			reactions.append([])
-
 	else:
 		reactions = reaction_list
 
@@ -98,12 +95,10 @@ def consumption_production(matrix, mode, reaction_list_provided = False, reactio
 		ix = 1
 		k = 'k'
 
-	non_reactant_parts = {2: k, 3: 'hv', 4: 'sigma'}
-
 	components = np.unique(np.concatenate(matrix[:,ix]))
 
 	idx = []
-	for _ in range(len(components)):
+	for _ in components:
 		idx.append([])
 
 	length = []
@@ -121,82 +116,129 @@ def consumption_production(matrix, mode, reaction_list_provided = False, reactio
 
 	reax = dict(zip(components, idx))
 
-	for i in components:
-		for j in reax[i][0]:
+	mapping = {'y': 0, 'k': 1, '-k': 2, 'hv': 3, 'sigma': 4}
 
+	for i in components:
+
+		for j in reax[i][0]:
 			temp = []
 
-			for key in non_reactant_parts:
-				if matrix[j][key][0] > -1:
-					part = [non_reactant_parts[key], matrix[j][key][0]]
-					temp.append(part)
+			for component_type, component_index in non_reactant_components[j]:
+				if component_type == 'k':
+					component_type = k
+
+				part = [mapping[component_type], component_index] # component_types are converted to intergers based on mapping dict
+				temp.append(part)
 
 			for l in matrix[j][0]:
-				y_part = ['y', l]
+				y_part = [0, l]  # component type y is assigned integer 0
 				temp.append(y_part)
 
 			reactions[i].append(temp)
 
 	return reactions
 
-def ODE_interpreter(matrix):
+def ODE_interpreter(matrix, non_reactant_components):
 
-	reactions = consumption_production(matrix, 'consume')
-	reactions = consumption_production(matrix, 'produce', 'True', reactions)
+	reactions = consumption_production(matrix, non_reactant_components, 'consume')
+	reactions = consumption_production(matrix, non_reactant_components, 'produce', 'True', reactions)
 
 	return reactions
 
 def reaction_string_to_matrix(string):
-	'''Proper info on number of k values and number of reactants'''
 
-	reax = ODE_string_interpreter_complete(string)	
+	reax, non_reactant_components = ODE_string_interpreter_complete(string)
 
 	reactant_number = len(np.unique(np.r_[np.concatenate(reax[:,0]), np.concatenate(reax[:,1])]))
-	k_number = len(np.unique(np.concatenate(reax[:,2])))
+	
+	k_indices = []
 
-	matrix = ODE_interpreter(reax)
+	for key, value in non_reactant_components.items():
+		for item in value:
+			if 'k' in item:
+				k_indices.append(item[1])
+
+	k_number = len(np.unique(np.asarray(k_indices)))
+
+	matrix = ODE_interpreter(reax, non_reactant_components)
 
 	return matrix, k_number, reactant_number
 
-def ODE_matrix_fit_func(k, initial_state, t, matrix, ravel = True, flux = np.array([1e18]), cross_section = np.array([2e-18, 4e-18, 8e-18])):
+def convert_nested_list_to_numba(lst):
 
-	def ODE_generator(y, t):
+	numba_matrix = List()
 
-		par = {'k': k, '-k': (-1) * k, 'y': y, 'hv': flux, 'sigma': cross_section}
-		r = []
+	for element in lst:
+		if isinstance(element, list):
+			numba_matrix.append(convert_nested_list_to_numba(element))
+		else:
+			numba_matrix.append(element)
 
-		for component in matrix:
-			r_component = 0
+	return numba_matrix
 
-			for component_reaction in component:
-				r_temp = 1. 
+def reaction_string_to_numba_matrix(string):
 
-				for term in component_reaction:
-					r_temp *= par[term[0]][term[1]]
+	reaction_matrix, k_number, reactant_number = reaction_string_to_matrix(string)
 
-				r_component += r_temp
-			r.append(r_component)
+	return convert_nested_list_to_numba(reaction_matrix), k_number, reactant_number
 
-		return r
+def ODE_generator(y, t, output, matrix, k, flux, cross_section):
+	'''Generation of ODE system based on provided matrix (list or numba.typedList)
+	'''
+	par = {0: y, 1: k, 2: (-1) * k, 3: flux, 4: cross_section}
 
-	sol = odeint(ODE_generator, initial_state, t)
+	for counter, component in enumerate(matrix):
+		r_component = 0
 
-	if ravel == True:
+		for component_reaction in component:
+			r_temp = 1. 
+
+			for term in component_reaction:
+				r_temp *= par[term[0]][term[1]]
+
+			r_component += r_temp
+
+		output[counter] = r_component
+
+	return output
+
+ODE_generator_numba = njit(ODE_generator, nogil=True) # jit compilation of ODE_generator
+
+def ODE_matrix_fit_func(k, initial_state, t, matrix, ravel = True, 
+			flux = np.array([1e18]), cross_section = np.array([2e-18, 4e-18, 8e-18]), numba = False):
+	'''Numerically solving ODE system generated by ODE_generator using SciPy's odeint function.
+	If numba is True, jit compiled ODE_generator is requested. In this case, "matrix" has to be a
+	numba.TypedList (generated by reaction_string_to_numba_matrix)
+	'''
+
+	if numba is True:
+		ODE_function = ODE_generator_numba
+	else:
+		ODE_function = ODE_generator
+
+	output = np.empty(len(initial_state))
+
+	sol = odeint(ODE_function, initial_state, t, args = (output, matrix, k, flux, 
+														cross_section))
+	if ravel is True:
 		sol = np.ravel(sol)
 
 	return sol
 
-def residual_ODE(P, initial, t, y, matrix):
+def residual_ODE(P, initial, t, y, matrix, numba = True):
 	''' Computes residual from data to be fitted and fit '''
 
-	y_fit = ODE_matrix_fit_func(P, initial, t, matrix)
+	y_fit = ODE_matrix_fit_func(P, initial, t, matrix, numba = numba)
 	res = np.sum((y - y_fit)**2)
 
 	return res / 1000.
 
-def ODE_fitting(data, t, reaction_string, sampling):
+def ODE_fitting(data, t, reaction_string, sampling, numba = True):
 
-	matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
+	if numba is True:
+		matrix, k_number, reactant_number = reaction_string_to_numba_matrix(reaction_string)
+	else:
+		matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
 
 	data_ravel = np.ravel(data)
 
@@ -210,7 +252,7 @@ def ODE_fitting(data, t, reaction_string, sampling):
 
 	for _ in range(sampling):
 		guess = np.random.rand(k_number)/10000.
-		p = minimize(fun=residual_ODE, x0=guess, args=(data[0], t, data_ravel, matrix), bounds=bounds_tuple, method = 'L-BFGS-B')
+		p = minimize(fun=residual_ODE, x0=guess, args=(data[0], t, data_ravel, matrix, numba), bounds=bounds_tuple, method = 'L-BFGS-B')
 		results.append([p.fun, p.x])
 
 	results.sort(key=lambda x: x[0])
@@ -320,5 +362,5 @@ def main():
 	return kinetic_model, labels
 
 if __name__ == '__main__':
-	main()
+	#main()
 	plt.show()

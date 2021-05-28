@@ -110,7 +110,7 @@ def main():
 	das = Decay_Associated_Spectra()
 	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'g_triplet', ax = ax)
 
-	return fig
+	return fig, ax
 
 def secondary():
 	fig, ax = plt.subplots()
@@ -119,7 +119,7 @@ def secondary():
 	das = Decay_Associated_Spectra()
 	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'f_triplet', ax = ax)
 
-	return fig
+	return fig, ax
 
 def tertiary():
 	fig, ax = plt.subplots()
@@ -128,7 +128,7 @@ def tertiary():
 	das = Decay_Associated_Spectra()
 	das.plot_theoretical_difference_spectrum('MA', 'three_singlet', 'g_r2_r2', ax = ax)
 
-	return fig
+	return fig, ax
 
 if __name__ == '__main__':
 	#main()

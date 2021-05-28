@@ -5,7 +5,7 @@ import io as io
 import find_nearest as fn
 from UV_Vis_Spectra import Constructed_UV_Vis_Spectrum, import_theoretical_spectra, import_plotting_parameters
 from Absorption_Spectrum_to_Dual_Irradiation import Absorption_Spectrum_Dual_Irradiation
-from utility_functions import import_lamp_spectra
+from utility_functions import import_lamp_spectra, format_scientific, scientific_notation
 from scipy.optimize import least_squares
 from scipy.stats import linregress
 from scipy import constants as con
@@ -480,10 +480,12 @@ class Intensity_Analysis:
 
 		x_full, y_solved, p = fit_generic(x, y, function)
 
-		print(p)
+		print('Intensity p:', p)
 
 		self.fit = np.c_[x_full, y_solved]
 		self.fit_function = function
+
+		return np.sum((function(p, x) - y)**2)
 
 	def log_linear_analysis(self, data_type, fixed_k1):
 
@@ -516,6 +518,9 @@ class Intensity_Analysis:
 		if data_type == 'fit':
 			if self.fit_function == square_law:
 				ax.plot(self.fit[:,0], self.fit[:,1], color = 'green', label = r'Fit using $f(x) = ax^{2}$', linewidth = 2)
+			elif self.fit_function == linear_model:
+				ax.plot(self.fit[:,0], self.fit[:,1], color = 'green', label = r'Fit using $f(x) = ax$', linewidth = 2)
+
 			else:
 				ax.plot(self.fit[:,0], self.fit[:,1], color = 'black')
 
@@ -1034,9 +1039,39 @@ def tertiary():
 
 	return fig
 
+def flux_rate_relationship_linear_fit():
+
+	excel_exps = convert_xlsx_to_experiments('../Experimental_Data/Liquid_Phase_O2_Data/Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	actinometry = Chemical_Actinometry('../Experimental_Data/Chemical_Actinometry.xlsx', '../Experimental_Data/20120613_Lumatec2_Spektren.txt')
+
+	fig, ax = plt.subplots(1,2, figsize = (9,4))
+	fig.subplots_adjust(left = 0.09, right = 0.93, bottom = 0.15, top = 0.9, wspace = 0.3)
+
+	intensity = Intensity_Analysis('feature', excel_exps['intensity'], order_poly = 1)
+
+
+	residual_square = intensity.fit_intensity_data(square_law, 'full', False)
+	intensity.plot_results('fit', False, ax[0], photon_flux = actinometry.p_scaled[0])
+	intensity.plot_results('average', False, ax[0], photon_flux = actinometry.p_scaled[0])
+
+	ax[0].annotate(r'$\sum(\vec{y} - \vec{y}_{fit})^{2}$ = %s' % format_scientific(residual_square), xy = (0.05, 0.7), xycoords = 'axes fraction')
+
+
+	residual_linear = intensity.fit_intensity_data(linear_model, 'full', False)
+	intensity.plot_results('fit', False, ax[1], photon_flux = actinometry.p_scaled[0])
+	intensity.plot_results('average', False, ax[1], photon_flux = actinometry.p_scaled[0])
+
+	ax[1].annotate(r'$\sum(\vec{y} - \vec{y}_{fit})^{2}$ = %s' % format_scientific(residual_linear), xy = (0.05, 0.7), xycoords = 'axes fraction')
+
+	ax[0].text(-0.20, 1.03, 'A', transform=ax[0].transAxes, size = 20, weight='bold')
+	ax[1].text(-0.20, 1.03, 'B', transform=ax[1].transAxes, size = 20, weight='bold')
+
+	return fig
+
 
 if __name__ == '__main__':
-	main()
+	#main()
 	#secondary()
 	#tertiary()
+	flux_rate_relationship_linear_fit()
 	plt.show()

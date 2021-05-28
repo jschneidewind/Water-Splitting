@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import Liquid_Phase_O2_Analysis as lp
-from Reaction_ODE_Fitting import ODE_matrix_fit_func, reaction_string_to_matrix
+from Reaction_ODE_Fitting import ODE_matrix_fit_func, reaction_string_to_matrix, reaction_string_to_numba_matrix
 from utility_functions import scientific_notation, plot_func
 from scipy.optimize import minimize, differential_evolution
 from scipy.integrate import odeint
@@ -9,35 +9,38 @@ from matplotlib import rcParams
 rcParams['font.family'] = 'sans-serif'
 rcParams['font.sans-serif'] = ['Arial']
 from timeit import default_timer as timer
+import pprint
+from numba import njit
+
+@njit
+def ODE_system(y, t, p, cross_section, flux):
+	'''ODE System assuming following reaction sequence:
+	B -> A (life time p[0])
+	A -- hv --> B (excitation probability p[1])
+	B -- hv --> C (excitation probability p[2])
+	C -- hv --> D (excitation probability p[3])
+	D -- hv --> E (excitation probability p[4])
+	C -> A (life time p[5])
+	'''
+
+	R1 = p[0] * y[1]
+	R2 = p[1] * cross_section * flux * y[0]  
+	R3 = p[2] * cross_section * flux * y[1]
+	R4 = p[3] * cross_section * flux * y[2]
+	R5 = p[4] * cross_section * flux * y[3]
+	R6 = p[5] * y[2]
+
+	ra = R1 - R2 + R6
+	rb = -R1 + R2 - R3
+	rc = R3 - R4 - R6
+	rd = R4 - R5
+	re = R5
+
+	return [ra, rb, rc, rd, re]
 
 def ODE_explicit_rate_law(p, initial_state, t, matrix, flux, cross_section, ravel = False):
 
-	def ODE_system(y, t):
-		'''ODE System assuming following reaction sequence:
-		B -> A (life time p[0])
-		A -- hv --> B (excitation probability p[1])
-		B -- hv --> C (excitation probability p[2])
-		C -- hv --> D (excitation probability p[3])
-		D -- hv --> E (excitation probability p[4])
-		C -> A (life time p[5])
-		'''
-
-		R1 = p[0] * y[1]
-		R2 = p[1] * cross_section * flux * y[0]  
-		R3 = p[2] * cross_section * flux * y[1]
-		R4 = p[3] * cross_section * flux * y[2]
-		R5 = p[4] * cross_section * flux * y[3]
-		R6 = p[5] * y[2]
-
-		ra = R1 - R2 + R6
-		rb = -R1 + R2 - R3
-		rc = R3 - R4 - R6
-		rd = R4 - R5
-		re = R5
-
-		return [ra, rb, rc, rd, re]
-
-	sol = odeint(ODE_system, initial_state, t)
+	sol = odeint(ODE_system, initial_state, t, args = (p, cross_section, flux))
 
 	if ravel is True:
 		sol = np.ravel(sol)
@@ -50,6 +53,7 @@ def normalize_data(data):
 	return data/(5e-3 * 1e6)
 
 def absorbance_to_cross_section(A):
+	'''Absorbance in M^-1 cm^-1 to cross section in cm^2'''
 
 	return A * (1/2.61e20)
 
@@ -64,15 +68,19 @@ class ODE_Model:
 		self.flux_factor = actinometry.p_scaled
 		self.flux_levels = self.power_levels * self.flux_factor
 
-	def ODE_fit_function(self, p, flux_levels, cross_section, initial_state, t, ravel = True, matrix = None, idx = 2, ODE_function = 'flexible'):
-		'''Solving ODE system for multiple flux levels and providing correct environment for fitting to experimental data'''
+	def ODE_fit_function(self, p, flux_levels, cross_section, initial_state, t, 
+				ravel = True, matrix = None, idx = 2, ODE_function = 'flexible', numba = True):
+		'''Solving ODE system for multiple flux levels and providing correct environment for 
+		fitting to experimental data
+		'''
 
 		results = []
 
 		for flux in flux_levels:
 
 			if ODE_function == 'flexible':
-				res = ODE_matrix_fit_func(p, initial_state, t, matrix, flux = np.array([flux]), cross_section = cross_section, ravel = False)
+				res = ODE_matrix_fit_func(p, initial_state, t, matrix, flux = np.array([flux]), 
+									cross_section = cross_section, ravel = False, numba = numba)
 			
 			else:
 				res = ODE_explicit_rate_law(p, initial_state, t, matrix, flux, cross_section[0])
@@ -86,15 +94,19 @@ class ODE_Model:
 
 		return results
 
-	def residual_ODE(self, p, data, flux_levels, cross_section, initial_state, t, matrix = None, idx = 2, ODE_function = 'flexible'):
+	def residual_ODE(self, p, data, flux_levels, cross_section, initial_state, t, 
+					matrix = None, idx = 2, ODE_function = 'flexible', numba = True):
 		'''Residual for fitting using ODE_fit_function'''
 
-		y_fit = self.ODE_fit_function(p, flux_levels, cross_section, initial_state, t, matrix = matrix, idx = idx, ODE_function = ODE_function)
+		y_fit = self.ODE_fit_function(p, flux_levels, cross_section, initial_state, t, 
+							matrix = matrix, idx = idx, ODE_function = ODE_function, numba = numba)
 		res = np.sum((data - y_fit)**2)
 
 		return res / 1000.
 
-	def fit_ODE(self, absorbance, method, reaction_string = None, guess = np.array([1/1e-5, 1., 0.001, 0.01]), idx = 2, ODE_function = 'flexible', bounds = [[1., 1000.], [0.1, 10.], [0., 1.], [0., 1.], [0., 1.], [1., 1000.]]):
+	def fit_ODE(self, absorbance, method, reaction_string = None, guess = np.array([1/1e-5, 1., 0.001, 0.01]), 
+				idx = 2, ODE_function = 'flexible', 
+				bounds = [[1., 1000.], [0.1, 10.], [0., 1.], [0., 1.], [0., 1.], [1., 1000.]], numba = True, workers = 1):
 		'''Fitting experimental data using ODE_fit_function.
 		Flux levels are determined by proportionality of power levels and photon flux determined in Chemical_Actinometry module
 		Cross sections are calculated from Absorbance in M^-1 cm^-1
@@ -107,6 +119,8 @@ class ODE_Model:
 		in ODE_explicit_rate_law() is used (keyword other than 'flexible' for ODE_function).
 
 		If 'flexible' is used, a reaction_string defining the reaction network has to be provided.
+		'flexible' can be used in combination with 'numba', which activates generation of numba typed reaction matrix
+		and requests execution of jit compiled ODE_generator for fast execution.
 
 		Computationally, the explicit rate law is ca. 3-4 times faster than the on-the-fly generation. This difference becomes
 		significant when a computationally expensive optimization algorithm (e.g. differential evolution) is used.
@@ -119,7 +133,10 @@ class ODE_Model:
 		data = normalize_data(self.average_data)
 		data_ravel = np.ravel(data)
 
-		matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
+		if numba is True:
+			matrix, k_number, reactant_number = reaction_string_to_numba_matrix(reaction_string)
+		else:
+			matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
 
 		self.matrix = matrix
 		self.idx = idx
@@ -137,15 +154,22 @@ class ODE_Model:
 				bounds_arr.append([0.0, np.inf])
 			bounds_tuple = tuple(bounds_arr)
 
-			p = minimize(fun=self.residual_ODE, x0=guess, args=(data_ravel, self.flux_levels, self.cross_section, self.initial_state, self.time, matrix, idx, ODE_function), bounds= bounds_tuple, method = method)
+			p = minimize(fun=self.residual_ODE, x0=guess, args=(data_ravel, self.flux_levels, 
+						self.cross_section, self.initial_state, self.time, matrix, idx, ODE_function,
+						numba), bounds= bounds_tuple, method = method)
 
 		elif method == 'differential_evolution':
-			p = differential_evolution(func=self.residual_ODE, bounds = bounds, args = (data_ravel, self.flux_levels, self.cross_section, self.initial_state, self.time, matrix, idx, ODE_function))
+			p = differential_evolution(func=self.residual_ODE, bounds = bounds, args = (data_ravel, 
+									  self.flux_levels, self.cross_section, self.initial_state, self.time, 
+									  matrix, idx, ODE_function, numba), workers = workers)
 	
 		else:
-			p = minimize(fun=self.residual_ODE, x0=guess, args=(data_ravel, self.flux_levels, self.cross_section, self.initial_state, self.time, matrix, idx, ODE_function), method = method)
+			p = minimize(fun=self.residual_ODE, x0=guess, args=(data_ravel, self.flux_levels, 
+						 self.cross_section, self.initial_state, self.time, matrix, idx, ODE_function,
+						 numba), method = method)
 
-		y_solved = self.ODE_fit_function(p.x, self.flux_levels, self.cross_section, self.initial_state, self.time, ravel = False, matrix = matrix, idx = idx)
+		y_solved = self.ODE_fit_function(p.x, self.flux_levels, self.cross_section, self.initial_state, 
+										self.time, ravel = False, matrix = matrix, idx = idx, numba = numba)
 
 		print('residual:', p.fun)
 		print('p:', p.x)
@@ -155,16 +179,21 @@ class ODE_Model:
 		self.p = p.x
 		self.y_solved = y_solved
 
-	def generate_model(self, p, reaction_string, absorbance, idx = 2, ODE_function = 'flexible'):
+	def generate_model(self, p, reaction_string, absorbance, idx = 2, ODE_function = 'flexible', numba = False):
 
-		matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
+		if numba is True:
+			matrix, k_number, reactant_number = reaction_string_to_numba_matrix(reaction_string)
+		else:
+			matrix, k_number, reactant_number = reaction_string_to_matrix(reaction_string)
 		
 		initial_state = np.zeros(reactant_number)
 		initial_state[0] = 1.
 
 		cross_section = absorbance_to_cross_section(absorbance)
 
-		self.y_solved = self.ODE_fit_function(p, self.flux_levels, cross_section, initial_state, self.time, ravel = False, matrix = matrix, idx = idx, ODE_function = ODE_function)
+		self.y_solved = self.ODE_fit_function(p, self.flux_levels, cross_section, initial_state, 
+												self.time, ravel = False, matrix = matrix, idx = idx, 
+												ODE_function = ODE_function, numba = numba)
 		self.data_normalized = normalize_data(self.average_data)
 
 	def calculate_initial_rates(self, data = None, flux_levels = None):
@@ -191,7 +220,7 @@ class ODE_Model:
 
 		return p
 
-	def initial_rate_tau_dependence(self, absorbance, tau_values, matrix = None, idx = None):
+	def initial_rate_tau_dependence(self, absorbance, tau_values, matrix = None, idx = None, numba = True):
 
 		if matrix == None:
 			matrix = self.matrix
@@ -209,7 +238,8 @@ class ODE_Model:
 			lamb = 1./i
 			p[0] = lamb
 		
-			results = self.ODE_fit_function(p, flux_levels, cross_section, self.initial_state, self.time, ravel = False, matrix = matrix, idx = idx)
+			results = self.ODE_fit_function(p, flux_levels, cross_section, self.initial_state, 
+											self.time, ravel = False, matrix = matrix, idx = idx, numba = numba)
 			initial_rate_fit = self.calculate_initial_rates(data = results, flux_levels = flux_levels)
 			fits.append(initial_rate_fit[1])
 
@@ -411,7 +441,9 @@ def Three_photon_mechanism_reversible():
 
 	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
 
-	#ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, idx = 3, ODE_function = 'explicit', bounds = [[1., 1000.], [0.1, 10.], [0., 1.], [0., 1.], [0., 1.], [1., 1000.]])
+	# ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, idx = 3, 
+	# 					ODE_function = 'explicit', 
+	# 					bounds = [[1., 1000.], [0.1, 10.], [0., 1.], [0., 1.], [0., 1.], [1., 1000.]])
 	ODE_model.generate_model(p, reaction_string, np.array([3000.]), idx = 3)
 
 	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
@@ -425,6 +457,10 @@ def Three_photon_mechanism_reversible():
 	return fig, ax
 
 def Three_photon_mechanism_reversible_cubic():
+	'''Modelling of three photon reaction, O2 is reaction component D. The second photochemical reaction intermediate C reverts
+	back to A. Solution (p) taken from Three_photon_mechanism_reversible but lifetime of B decreased (increasing 1/tau) to
+	illustrate cubic dependence of reaction rate on photon flux.
+     '''
 	
 	reaction_string = ['B > A, k1',
 				       'A > B, k2, hv1, sigma1',
@@ -457,7 +493,9 @@ def bimolecular_test():
 
 	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
 	
-	ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, guess = np.array([0.01, 1., 0.001, 1/1e-5]), idx = 2, ODE_function = 'flexible', bounds = [[0., 1.], [0., 1.], [0., 1.]])
+	ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, 
+					guess = np.array([0.01, 1., 0.001, 1/1e-5]), idx = 2, ODE_function = 'flexible', 
+					bounds = [[0., 1.], [0., 1.], [0., 1.]], numba = False)
 
 	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
 	fig.subplots_adjust(wspace = 0.67, bottom = 0.11, top = 0.7, left = 0.07, right = 0.98) 
@@ -465,19 +503,169 @@ def bimolecular_test():
 	ODE_model.plot_ODE_fit(ax = ax[0], show_data = True)
 
 	ODE_model.calculate_initial_rates()
-	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])		
+	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])
+
+def simultanous_two_photon_bimolecular():
+	'''Simultanous absorption of two-photons by A generates B, which can either react to C in a bimolecular reaction
+	or decays back to A. O2 is reaction component C. C is consumed in a photochemical reaction.
+	'''
+
+	reaction_string = ['B > A, k1',
+				       'A > B, k2, hv1, sigma1, hv1, sigma1',
+				       'B + B > C, k3',
+				       'C > D, k4, hv1, sigma1']     
+					 
+	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	
+	start = timer()	
+
+	# ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, 
+	# 				  idx = 2, ODE_function = 'flexible', bounds = [[1., 10000.], [0., 1.], [0., 1.], [0., 1.]], 
+	# 				  numba = True)
+
+	p = np.array([2.45691469e+01, 2.87272267e-01, 2.44939880e-06, 2.75597826e-03])
+
+	ODE_model.generate_model(p, reaction_string, np.array([3000.]), idx = 2, ODE_function = 'flexible')
+
+	end = timer()
+	print('Time:', end - start)
+
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
+	fig.subplots_adjust(wspace = 0.67, bottom = 0.11, top = 0.7, left = 0.07, right = 0.98) 
+
+	ODE_model.plot_ODE_fit(ax = ax[0], show_data = True)
+
+	ODE_model.calculate_initial_rates()
+	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])
+
+	return fig, ax
+
+def simultanous_two_photon_bimolecular_quartic():
+	'''Simultanous absorption of two-photons by A generates B, which can either react to C in a bimolecular reaction
+	or decays back to A. O2 is reaction component C. C is consumed in a photochemical reaction.
+	Solution (p) taken from simultanous_two_photon_bimolecular, lifetime of B decreased (increase of 1/tau) to
+	illustrate quartic dependence.
+	'''
 
 
+	reaction_string = ['B > A, k1',
+				       'A > B, k2, hv1, sigma1, hv1, sigma1',
+				       'B + B > C, k3',
+				       'C > D, k4, hv1, sigma1']     
+					 
+	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	
+	start = timer()	
+
+	# ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, 
+	# 				  idx = 2, ODE_function = 'flexible', bounds = [[1., 10000.], [0., 1.], [0., 1.], [0., 1.]], 
+	# 				  numba = True)
+
+	p = np.array([2.45691469e+04, 2.87272267e-01, 2.44939880e-01, 2.75597826e-03])
+
+	ODE_model.generate_model(p, reaction_string, np.array([3000.]), idx = 2, ODE_function = 'flexible')
+
+	end = timer()
+	print('Time:', end - start)
+
+
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
+	fig.subplots_adjust(wspace = 0.67, bottom = 0.11, top = 0.7, left = 0.07, right = 0.98) 
+
+	ODE_model.plot_ODE_fit(ax = ax[0], show_data = False)
+
+	ODE_model.calculate_initial_rates()
+	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])
+
+	return fig, ax
+
+def simultanous_two_photon_bimolecular_irreversible():
+	'''Simultanous absorption of two photons by A generates B, which reacts in a bimolecular reaction to form C.
+	O2 is reaction component C. C is conumsed in a thermal reaction form D (no feasible solution could be found
+	when C is consumed in a photochemical reaction)
+	'''
+
+	reaction_string = ['A > B, k1, hv1, sigma1, hv1, sigma1',
+				       'B + B > C, k2',
+				       'C > D, k3']    
+
+	p = np.array([1.84489450e-04, 2.76715997e-05, 9.85734003e-01]) 
+					 
+	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
+	
+	start = timer()	
+
+	# ODE_model.fit_ODE(np.array([3000.]), 'differential_evolution', reaction_string = reaction_string, 
+	# 				  idx = 2, ODE_function = 'flexible', bounds = [[0., 1.], [0., 1.], [0., 1.]], 
+	# 				  numba = True)
+
+	ODE_model.generate_model(p, reaction_string, np.array([3000.]), idx = 2, ODE_function = 'flexible', numba = False)
+
+	end = timer()
+
+	print('Time:', end - start)
+
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
+	fig.subplots_adjust(wspace = 0.67, bottom = 0.11, top = 0.7, left = 0.07, right = 0.98) 
+
+	ODE_model.plot_ODE_fit(ax = ax[0], show_data = True)
+
+	ODE_model.calculate_initial_rates()
+	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])
+
+	return fig, ax
+
+def two_photon_irreversible():
+	'''A absorbs a photon to generate B, which in turn absorbs a photon to generate C (O2). C is consumed
+	in a thermal reaction to form D.
+	'''
+
+	reaction_string = ['A > B, k1, hv1, sigma1',
+				       'B > C, k2, hv1, sigma2',
+				       'C > D, k3']  
+	 
+	ODE_model = ODE_Model('Liquid_Phase_O2_Experiments_Metadata.xlsx')
+
+	p = np.array([1.21247608e-07, 6.73699324e-03, 5.43291571e-02])
+	p = np.array([2.12881153e-07, 4.20549541e-03, 9.53526288e-02])
+	p = np.array([1.83674694e-06, 2.89117582e-03, 8.15086585e-01])
+
+	
+	start = timer()	
+
+	# ODE_model.fit_ODE(np.array([3000., 3000.]), 'differential_evolution', reaction_string = reaction_string, 
+	# 				  idx = 2, ODE_function = 'flexible', bounds = [[0., 1.], [0., 1.], [0., 1.]], 
+	# 				  numba = True)
+
+	ODE_model.generate_model(p, reaction_string, np.array([3000., 3000.]), idx = 2, ODE_function = 'flexible', numba = False)
+
+	end = timer()
+
+	print('Time:', end - start)
+
+	fig, ax = plt.subplots(1, 2, figsize = (9.2,5.0))
+	fig.subplots_adjust(wspace = 0.67, bottom = 0.11, top = 0.7, left = 0.07, right = 0.98) 
+
+	ODE_model.plot_ODE_fit(ax = ax[0], show_data = True)
+
+	ODE_model.calculate_initial_rates()
+	ODE_model.plot_initial_rate_flux_dependence(ax = ax[1])
+
+	return fig, ax
 
 
 
 if __name__ == '__main__':
-	main()
+	#main()
 	#Bimolecular()
 	#STH_estimate_B_conc()
 	#Three_photon_mechanism_irreversible()
 	#Three_photon_mechanism_reversible()
 	#Three_photon_mechanism_reversible_cubic()
 	#bimolecular_test()
+	#simultanous_two_photon_bimolecular()
+	#simultanous_two_photon_bimolecular_quartic()
+	#simultanous_two_photon_bimolecular_irreversible()
+	two_photon_irreversible()
 
 	plt.show()
