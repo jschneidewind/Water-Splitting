@@ -462,10 +462,10 @@ class Figure:
 		plt.show()
 
 	def save(self):
-		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 650)
+		self.fig.savefig('../Figures/%s.pdf' % self.name, transparent = True, dpi = 700)
 
 
-figure = Figure(Dual_Irradiation_g_trans_mono_three_trans_triplet)
+figure = Figure(Conical_Intersections)
 figure.show()
 #figure.save()
 
