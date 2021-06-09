@@ -150,6 +150,7 @@ def Free_Energy_Profile():
 	return fig
 
 def Free_Energy_Profile_with_ChemDraw():
+	rcParams['font.size'] = 11
 
 	profile = fe.Free_Energy_Profile('../Computational_Data/Overview_Energies/DFT_Energies.xlsx')
 	fig = profile.final_figure
@@ -161,6 +162,7 @@ def Free_Energy_Profile_with_ChemDraw():
 	return fig
 
 def Conical_Intersections():
+	rcParams['font.size'] = 11
 
 	conical = fe.Conical_Intersections('../Computational_Data/Overview_Energies/CASSCF_Energies.xlsx')
 	fig = conical.final_figure
@@ -260,6 +262,7 @@ def EPR_Spectrum():
 	return fig
 
 def UV_Vis_Fluorescence():
+	rcParams['font.size'] = 12
 
 	fig, ax = uvvis.secondary()
 
@@ -467,5 +470,5 @@ class Figure:
 
 figure = Figure(Conical_Intersections)
 figure.show()
-#figure.save()
+figure.save()
 

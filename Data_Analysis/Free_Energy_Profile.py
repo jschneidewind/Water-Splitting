@@ -82,10 +82,10 @@ class Free_Energy_Profile:
 
 		elif int_type == prev_int_type:
 			if int_type == 'A':
-				wavelength = ax.annotate('$h$$\\nu_{1}$\n(320-\n400 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 10, ha = 'center', va = 'center')
+				wavelength = ax.annotate('$h$$\\nu_{1}$\n(320-\n400 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), ha = 'center', va = 'center', color = 'darkblue')
 				excitation = ax.annotate('', xy =(pos, energy - arrow_space), xytext=(pos, prev_energy + arrow_space), arrowprops={'arrowstyle': '->', 'color': 'darkblue'})
 			if int_type == 'B':
-				wavelength = ax.annotate('$h$$\\nu_{2}$\n(450-\n600 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), fontsize = 10, ha = 'center', va = 'center')
+				wavelength = ax.annotate('$h$$\\nu_{2}$\n(455-\n630 nm)', xy = (pos + self.wavelength_offset, (energy + prev_energy)/2.), ha = 'center', va = 'center', color = 'darkred')
 				excitation = ax.annotate('', xy =(pos, energy - arrow_space), xytext=(pos, prev_energy + arrow_space), arrowprops={'arrowstyle': '->', 'color': 'darkred'})
 
 	def plot_line_and_label(self, pos, width, energy, color_used, name_label, text_offset, ax, energy_offset = 0, energy_label = True, intermediate_label = True, approx = False, color_text = 'black'):
@@ -173,7 +173,7 @@ class Free_Energy_Profile:
 		width = 0.3
 		arrow_space = 7.*4.184
 		text_offset = 3.*4.184
-		energy_offset = 5.*4.184
+		energy_offset = 5.7*4.184
 		image_offset = 20.*4.184
 		offset_multi = 2.5
 		seperator_top = 10.*4.184
@@ -184,7 +184,7 @@ class Free_Energy_Profile:
 		ox_sphere_zoom = 0.023
 		ox_sphere_y = -15.*4.184
 		plus_sign_offset = -25.*4.184
-		self.wavelength_offset = 0.37
+		self.wavelength_offset = 0.40
 
 		ax.set_xlim(x_lim_low, x_lim_high)
 		ax.set_ylim(y_lim_low, y_lim_high)
@@ -290,7 +290,7 @@ class Conical_Intersections:
 		path_offset = 2.9*4.184
 		image_offset = 0.1
 		image_offset_y = -0.4
-		sep_offset = -0.13
+		sep_offset = -0.15
 		sep_end = -0.68
 		vert_sep_pos = -0.63
 
@@ -333,8 +333,8 @@ class Conical_Intersections:
 		
 		ax.plot(positions, path + path_offset, '--', color = 'black', label = 'Reaction Path', zorder = 10)
 		
-		if self.pcm is False:
-			ax.text(-0.12, 1.025, 'C', transform=ax.transAxes, size = 20, weight='bold')
+		# if self.pcm is False:
+		# 	ax.text(-0.12, 1.025, 'C', transform=ax.transAxes, size = 20, weight='bold')
 
 		plt.xticks(positions, x_labels)
 		ax.legend()

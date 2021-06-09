@@ -530,7 +530,7 @@ class Intensity_Analysis:
 		if ax != plt:
 
 			ax.set_xlabel(r'Photon Flux (320 - 500 nm) / $ s^{-1}$')
-			ax.set_ylabel(r'Initial Rate of $O_2$ Formation / $\mu mol s^{-1} l^{-1}$')
+			ax.set_ylabel(r'Initial Rate of $O_2$ Formation / $\mu mol$ $s^{-1}$ $l^{-1}$') 
 			ax.grid(color = 'grey', linestyle = '--', linewidth = 0.2)
 			ax.legend()
 

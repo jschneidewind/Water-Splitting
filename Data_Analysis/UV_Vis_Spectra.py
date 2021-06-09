@@ -283,7 +283,7 @@ def secondary():
 	fig.subplots_adjust(right = 0.75, top = 0.95)
 
 	theoretical = Theoretical_UV_Vis_Spectrum(theoretical_spectra, 'f_singlet', plotting_parameter)
-	plot_a, ax_a = theoretical.plot_uv_vis(ax = ax, scaling_factor = 0.3, plotting_image = False, linewidth = 1., oscillator_ylim = True, label = 'Predicted Absorbance for\n' + r'[$\bf{A}$]S$_{0}$ (scaled)', color = 'black')
+	plot_a, ax_a = theoretical.plot_uv_vis(ax = ax, scaling_factor = 0.3, plotting_image = False, linewidth = 1., oscillator_ylim = True, label = 'Predicted Absorbance\nfor ' + r'[$\bf{A}$]S$_{0}$ (scaled)', color = 'black')
 
 	experimental = Experimental_UV_Vis_Fluorescence('Fluorescence_Complex_1/JS591_exc370_20nm_slit_each_slow.csv', 'Fluorescence_Water/Wasser_exc370_20nm_slit_each_slow.csv')
 	plot_b, plot_c, ax_b, ax_c = experimental.plot_uv_vis_fluorescence(ax = ax)
