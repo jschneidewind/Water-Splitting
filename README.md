@@ -2,6 +2,8 @@
 
 This repository contains original data and analysis code for "Two-photon water splitting at a molecular ruthenium complex".
 
+The publication (open access) is available [here](https://doi.org/10.1039/D1EE01053K).
+
 `Computational_Data` contains computational data for all computed intermediates (typically .log files and visualizations)
 
 `Data_Analysis` contains the different Python programs used for data analysis. Note that these programs use various files from `Computational_Data` as well as `Experimental_Data`, hence these directory must be present to run most of them.
