@@ -2,7 +2,7 @@
 
 This repository contains original data and analysis code for "Two-photon water splitting at a molecular ruthenium complex".
 
-The publication (open access) is available [here](https://doi.org/10.1039/D1EE01053K).
+The publication (open access) is available [here](https://doi.org/10.1039/D1EE01053K) and you can directly access the PDF file [here](https://github.com/jschneidewind/Water-Splitting/blob/master/Documents/Paper_d1ee01053k.pdf).
 
 `Computational_Data` contains computational data for all computed intermediates (typically .log files and visualizations)
 
